@@ -159,9 +159,6 @@ const DeckCollection = () => {
             <div
               key={index}
               className="deck-card"
-              draggable
-              onDragStart={(e) => handleDragStart(e, card)}
-              onDragEnd={() => handleRemoveFromDeck(card.id)}
             >
               {[...Array(card.quantity)].map((_, i) => (
                 <img
@@ -169,6 +166,9 @@ const DeckCollection = () => {
                   src={card.card_images[0].image_url_small}
                   alt={card.name}
                   style={{ width: '150px', height: 'auto' }}
+                  onDragStart={(e) => handleDragStart(e, card)}
+                  onDragEnd={() => handleRemoveFromDeck(card.id)}
+                  draggable
                 />
               ))}
             </div>
