@@ -40,28 +40,27 @@ const DeckCollection = () => {
       return;
     }
 
-    const existingCardIndex = deck.findIndex((c) => c.id === card.id);
-    if (existingCardIndex !== -1 && deck[existingCardIndex].quantity >= 3) {
-      alert('Maximum 3 cards of the same type allowed');
-      return;
-    }
-
-    const updatedDeck = [...deck];
-    if (existingCardIndex !== -1) {
-      updatedDeck[existingCardIndex].quantity += 1;
+    const existingCard = deck.find((c) => c.id === card.id);
+    if (existingCard) {
+      if (existingCard.quantity < 3) {
+        setDeck([...deck.filter((c) => c.id !== card.id), { ...card, quantity: existingCard.quantity + 1 }]);
+      } else {
+        alert('Maximum 3 cards of the same type allowed');
+      }
     } else {
-      updatedDeck.push({ ...card, quantity: 1 });
+      setDeck([...deck, { ...card, quantity: 1 }]);
     }
-    setDeck(updatedDeck);
   };
 
-  const handleRemoveFromDeck = (cardIndex) => {
-    const updatedDeck = [...deck];
-    if (updatedDeck[cardIndex].quantity > 1) {
-      updatedDeck[cardIndex].quantity -= 1;
-    } else {
-      updatedDeck.splice(cardIndex, 1);
-    }
+  const handleRemoveFromDeck = (cardId) => {
+    const updatedDeck = deck.map((card) => {
+      if (card.id === cardId) {
+        if (card.quantity > 1) {
+          return { ...card, quantity: card.quantity - 1 };
+        }
+      }
+      return card;
+    }).filter((card) => card.quantity > 0);
     setDeck(updatedDeck);
   };
 
@@ -131,36 +130,50 @@ const DeckCollection = () => {
           />
         </label>
       </div>
-      <div className="card-list" style={{ maxHeight: '300px', overflowY: 'scroll' }}>
-        {filteredCardList.map((card) => (
-          <div
-            key={card.id}
-            className="card-item"
-            onClick={() => handleCardClick(card)}
-            draggable
-            onDragStart={(e) => handleDragStart(e, card)}
-          >
-            <h3>{card.name}</h3>
-            <img src={card.card_images[0].image_url_small} alt={card.name} style={{ width: '150px', height: 'auto' }} />
-          </div>
-        ))}
-      </div>
-      <div className="deck" onDrop={handleDrop} onDragOver={handleDragOver}>
-        <h2>Deck</h2>
-        <ul>
-          {deck.map((card, index) => (
-            <li key={index}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <img src={card.card_images[0].image_url_small} alt={card.name} style={{ width: '150px', height: 'auto' }} />
-                {[...Array(card.quantity)].map((_, i) => (
-                  <img key={i} src={card.card_images[0].image_url_small} alt={card.name} style={{ width: '50px', height: 'auto' }} />
-                ))}
-              </div>
-              <span>{card.name}</span>
-              <button onClick={() => handleRemoveFromDeck(index)}>Remove</button>
-            </li>
+      <div className="search-results" style={{ border: '4px solid black', borderRadius: '10px', padding: '10px', marginBottom: '20px' }}>
+        <h2>Search Results</h2>
+        <div className="card-list" style={{ maxHeight: '300px', overflowY: 'scroll' }}>
+          {filteredCardList.map((card) => (
+            <div
+              key={card.id}
+              className="card-item"
+              onClick={() => handleCardClick(card)}
+              draggable
+              onDragStart={(e) => handleDragStart(e, card)}
+            >
+              <h3>{card.name}</h3>
+              <img src={card.card_images[0].image_url_small} alt={card.name} style={{ width: '150px', height: 'auto' }} />
+            </div>
           ))}
-        </ul>
+        </div>
+      </div>
+      <div className="deck-box" onDrop={handleDrop} onDragOver={handleDragOver} style={{ border: '4px solid black', borderRadius: '10px', padding: '10px' }}>
+        <h2>Mein Deck</h2>
+        <div className="deck-count" style={{ fontWeight: 'bold', fontSize: '24px' }}>Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60</div>
+        <div
+          className="deck-cards"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {deck.map((card, index) => (
+            <div
+              key={index}
+              className="deck-card"
+              draggable
+              onDragStart={(e) => handleDragStart(e, card)}
+              onDragEnd={() => handleRemoveFromDeck(card.id)}
+            >
+              {[...Array(card.quantity)].map((_, i) => (
+                <img
+                  key={i}
+                  src={card.card_images[0].image_url_small}
+                  alt={card.name}
+                  style={{ width: '150px', height: 'auto' }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       {showModal && (
         <div className="modal">

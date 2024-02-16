@@ -91,64 +91,41 @@
   cursor: pointer;
 }
 
-/* Stile für den Deck hinzufügen-Button */
-.deck-button {
-  padding: 20px 40px;
-  font-size: 20px;
-  border: 2px solid #28a745;
-  border-radius: 10px;
-  background-color: #28a745;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.deck-button:hover {
-  background-color: #218838;
-}
-
-/* Stile für den Kartenentfernungsbutton */
-.remove-button {
-  padding: 8px 15px;
-  font-size: 14px;
-  border: 2px solid #dc3545;
-  border-radius: 10px;
-  background-color: #dc3545;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.remove-button:hover {
-  background-color: #c82333;
-}
-
 /* Zusätzliche spezifische Stile für .deck */
 .deck {
   margin-top: 20px;
-  max-height: 300px; /* Maximalhöhe des Decks */
-  overflow-y: auto; /* Vertikale Scrollbar anzeigen, wenn Inhalt überläuft */
+  border: 2px solid #333;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-/* Spezifische Stile für .card-list */
-.card-list {
-  max-height: 450px; /* Maximalhöhe des Ergebnisfelds */
-  border: 2px solid #333; /* Umrandung dicker machen */
+.deck-cards {
+  display: flex;
+  flex-wrap: wrap;
 }
 
-.deck-item {
-  position: relative;
+.deck-card {
+  display: flex;
+  align-items: center;
+  margin: 10px;
 }
 
-.deck-item .card-count {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #333;
-  color: #fff;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  font-size: 16px;
+.main-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.deck-card img {
+  width: 150px;
+  height: auto;
+}
+/* Stile für den Deck-Zähler */
+.deck-count {
+    font-size: 24px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  
