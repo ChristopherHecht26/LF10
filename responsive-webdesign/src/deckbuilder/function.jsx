@@ -1,46 +1,214 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import CardModal from "../card/CardModal"; // Aktualisieren Sie den Pfad hier
+
+import "../deckbuilder/searchbar.css";
 
 const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [cardInfo, setCardInfo] = useState(null);
-  const [error, setError] = useState('');
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [cardList, setCardList] = useState([]);
+  const [deck, setDeck] = useState([]);
+  const [filter, setFilter] = useState({
+    monster: true,
+    spell: true,
+    trap: true,
+  });
 
-  const handleSearch = async () => {
+  const fetchCards = async () => {
     try {
-      const response = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${searchTerm}`);
-      const data = await response.json();
-      if (data.data.length > 0) {
-        setCardInfo(data.data[0]);
-        setError('');
-      } else {
-        setError('Card not found');
-        setCardInfo(null);
+      if (searchTerm.length >= 3) {
+        const response = await fetch(
+          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${searchTerm}`
+        );
+        const data = await response.json();
+        setCardList(data.data);
       }
     } catch (error) {
-      console.error('Error fetching card:', error);
-      setError('Error fetching card. Please try again.');
-      setCardInfo(null);
+      console.error("Error fetching cards:", error);
     }
   };
 
+  useEffect(() => {
+    fetchCards();
+  }, [searchTerm]);
+
+  const handleAddToDeck = (card) => {
+    if (deck.length >= 60) {
+      alert("Maximum deck size reached (60 cards)");
+      return;
+    }
+
+    const existingCard = deck.find((c) => c.id === card.id);
+    if (existingCard) {
+      if (existingCard.quantity < 3) {
+        setDeck([
+          ...deck.filter((c) => c.id !== card.id),
+          { ...card, quantity: existingCard.quantity + 1 },
+        ]);
+      } else {
+        alert("Maximum 3 cards of the same type allowed");
+      }
+    } else {
+      setDeck([...deck, { ...card, quantity: 1 }]);
+    }
+  };
+
+  const handleRemoveFromDeck = (cardId) => {
+    const updatedDeck = deck
+      .map((card) => {
+        if (card.id === cardId) {
+          if (card.quantity > 1) {
+            return { ...card, quantity: card.quantity - 1 };
+          }
+        }
+        return card;
+      })
+      .filter((card) => card.quantity > 0);
+    setDeck(updatedDeck);
+  };
+
+  const handleDragStart = (event, card) => {
+    event.dataTransfer.setData("card", JSON.stringify(card));
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const cardData = JSON.parse(event.dataTransfer.getData("card"));
+    handleAddToDeck(cardData);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const handleFilterChange = (event) => {
+    const { name, checked } = event.target;
+    setFilter({ ...filter, [name]: checked });
+  };
+
+  const filteredCardList = cardList.filter((card) => {
+    if (filter.monster && card.type.toLowerCase().includes("monster"))
+      return true;
+    if (filter.spell && card.frameType === "spell") return true;
+    if (filter.trap && card.frameType === "trap") return true;
+    return false;
+  });
+
   return (
-    <div>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Enter card name..."
-      />
-      <button onClick={handleSearch}>Search</button>
-      {error && <p>{error}</p>}
-      {cardInfo && (
-        <div>
-          <h2>{cardInfo.name}</h2>
-          <p>Type: {cardInfo.type}</p>
-          <p>ATK: {cardInfo.atk}</p>
-          <p>DEF: {cardInfo.def}</p>
-          <img src={cardInfo.card_images[0].image_url} alt={cardInfo.name} />
+    <div className="deck-collection">
+      <div className="search-bar">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Enter card name..."
+        />
+        <button onClick={fetchCards} style={{ fontSize: "16px" }}>
+          Search
+        </button>
+      </div>
+      <div className="filter">
+        <label style={{ fontSize: "20px" }}>
+          Monster
+          <input
+            type="checkbox"
+            name="monster"
+            checked={filter.monster}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label style={{ fontSize: "20px" }}>
+          Spell
+          <input
+            type="checkbox"
+            name="spell"
+            checked={filter.spell}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label style={{ fontSize: "20px" }}>
+          Trap
+          <input
+            type="checkbox"
+            name="trap"
+            checked={filter.trap}
+            onChange={handleFilterChange}
+          />
+        </label>
+      </div>
+      <div
+        className="search-results"
+        style={{
+          border: "4px solid black",
+          borderRadius: "10px",
+          padding: "10px",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Search Results</h2>
+        <div
+          className="card-list"
+          style={{ maxHeight: "300px", overflowY: "scroll" }}
+        >
+          {filteredCardList.map((card) => (
+            <div
+              key={card.id}
+              className="card-item"
+              onDragStart={(e) => handleDragStart(e, card)}
+              draggable
+              onClick={() => setSelectedCard(card)}
+            >
+              <h3>{card.name}</h3>
+              <img
+                src={card.card_images[0].image_url_small}
+                alt={card.name}
+                style={{ width: "150px", height: "auto" }}
+              />
+            </div>
+          ))}
         </div>
+      </div>
+      <div
+        className="deck-box"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        style={{
+          border: "4px solid black",
+          borderRadius: "10px",
+          padding: "10px",
+        }}
+      >
+        <h2>Mein Deck</h2>
+        <div
+          className="deck-count"
+          style={{ fontWeight: "bold", fontSize: "24px" }}
+        >
+          Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60
+        </div>
+        <div
+          className="deck-cards"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {deck.map((card, index) => (
+            <div key={index} className="deck-card">
+              {[...Array(card.quantity)].map((_, i) => (
+                <img
+                  key={i}
+                  src={card.card_images[0].image_url_small}
+                  alt={card.name}
+                  style={{ width: "150px", height: "auto" }}
+                  onDragStart={(e) => handleDragStart(e, card)}
+                  onDragEnd={() => handleRemoveFromDeck(card.id)}
+                  draggable
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      {selectedCard && (
+        <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
       )}
     </div>
   );

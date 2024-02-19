@@ -1,131 +1,32 @@
-/* Gemeinsame Stile für .search-bar und .filter */
-.search-bar,
-.filter {
+body {
+  background-color: white;
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
 
-/* Stile für die Suchbox */
-.search-bar input[type="text"] {
+.container {
+  height: 300px;
   width: 300px;
-  padding: 10px;
-  font-size: 16px;
-  border: 2px solid #ccc;
-  border-radius: 10px;
-}
-
-/* Stile für die Suchbox-Button */
-.search-bar button {
-  padding: 15px 30px;
-  font-size: 18px;
-  border: 2px solid #007bff;
-  border-radius: 10px;
-  background-color: #007bff;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.search-bar button:hover {
-  background-color: #0056b3;
-}
-
-/* Stile für die Filter-Label */
-.filter label {
-  font-size: 20px;
-}
-
-/* Gemeinsame Stile für .card-list und .deck */
-.card-list,
-.deck {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-/* Gemeinsame Stile für .card-item und .deck-item */
-.card-item,
-.deck-item {
-  width: 150px;
-  margin: 10px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.card-item img,
-.deck-item img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Stile für die Modal-Box */
-.modal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 80%;
-  text-align: center;
-  position: relative;
-}
-
-.close {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* Zusätzliche spezifische Stile für .deck */
-.deck {
-  margin-top: 20px;
-  border: 2px solid #333;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.deck-cards {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.deck-card {
-  display: flex;
-  align-items: center;
-  margin: 10px;
-}
-
-.main-card {
+  background-color: grey;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 
-.deck-card img {
-  width: 150px;
-  height: auto;
+.container-head {
+  margin-bottom: 10px;
 }
-/* Stile für den Deck-Zähler */
-.deck-count {
-    font-size: 24px;
-    font-weight: bold;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-  }
-  
+
+.decks-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Optional: Stil für die Eingabe (input) hinzufügen */
+input {
+  margin-bottom: 5px;
+}
