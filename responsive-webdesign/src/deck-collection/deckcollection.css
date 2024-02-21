@@ -1,9 +1,20 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
 /* Gemeinsame Stile für .search-bar und .filter */
 .search-bar,
 .filter {
   display: flex;
+  flex-grow: 1;
   justify-content: center;
   margin-bottom: 20px;
+}
+.search-results,
+.deck-box,
+.card-info-container {
+  margin-left: 20px; /* Abstand zwischen den Containern anpassen */
 }
 
 /* Stile für die Suchbox */
@@ -97,6 +108,8 @@
   border: 2px solid #333;
   border-radius: 10px;
   padding: 10px;
+  flex-grow: 1;
+  max-width: 800px;
 }
 
 .deck-cards {
@@ -124,8 +137,43 @@
 .deck-count {
     font-size: 24px;
     font-weight: bold;
-    position: absolute;
+    position: relative;
     top: 10px;
     left: 10px;
   }
-  
+  .deck-collection {
+    display: flex;
+  }
+
+  .search-bar,
+.deck {
+  max-width: 600px; /* Beispiel: Setze hier die gewünschte maximale Breite */
+  margin: 0 auto; /* Zentriert die Elemente innerhalb des Containers */
+}
+.search-bar,
+.deck {
+  max-width: 600px; /* Beispiel: Setze hier die gewünschte maximale Breite */
+  margin: 0 auto; /* Zentriert die Elemente innerhalb des Containers */
+}
+
+.card-item,
+.deck-item {
+  width: 120px; /* Beispiel: Setze hier die gewünschte Breite für Suchergebnisse und Karten im Deck */
+  margin: 8px; /* Beispiel: Verringert den Abstand zwischen den Karten */
+}
+.search-bar button {
+  padding: 10px 20px; /* Beispiel: Reduziert die Button-Größe */
+  font-size: 16px; /* Beispiel: Reduziert die Schriftgröße */
+}
+.card-list,
+.deck-cards {
+  min-width: 600px;
+  min-height: 100%;
+  max-width: 600px; /* Beispiel: Setze hier die gewünschte maximale Breite */
+  margin: 0 auto; /* Zentriert die Elemente innerhalb des Containers */
+}
+.card-list .card-item,
+.deck-cards .deck-item {
+  width: 120px; /* Beispiel: Setze hier die gewünschte Breite für Suchergebnisse und Karten im Deck */
+  margin: 8px; /* Beispiel: Verringert den Abstand zwischen den Karten */
+}
