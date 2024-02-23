@@ -1,9 +1,17 @@
+body {
+  background-image: url('/public/background.jpg'); /* Hier den Pfad zum Hintergrundbild einfügen */
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
 /* Gemeinsame Stile für .search-bar und .filter */
 .search-bar,
 .filter {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+  color: black;
 }
 
 /* Stile für die Suchbox */
@@ -13,6 +21,12 @@
   font-size: 16px;
   border: 2px solid #ccc;
   border-radius: 10px;
+  transition: border-color 0.3s ease;
+  color: black; /* Schriftfarbe auf schwarz ändern */
+}
+
+.search-bar input[type="text"]:focus {
+  border-color: #007bff;
 }
 
 /* Stile für die Suchbox-Button */
@@ -33,7 +47,7 @@
 
 /* Stile für die Filter-Label */
 .filter label {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Gemeinsame Stile für .card-list und .deck */
@@ -44,6 +58,7 @@
   justify-content: center;
   border-radius: 10px;
   padding: 10px;
+  font-size: 18px;
 }
 
 /* Gemeinsame Stile für .card-item und .deck-item */
@@ -53,12 +68,21 @@
   margin: 10px;
   text-align: center;
   cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
 .card-item img,
 .deck-item img {
   max-width: 100%;
   height: auto;
+}
+
+.card-item:hover,
+.deck-item:hover {
+  transform: translateY(-5px);
 }
 
 /* Stile für die Modal-Box */
@@ -81,6 +105,7 @@
   max-width: 80%;
   text-align: center;
   position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .close {
@@ -93,10 +118,9 @@
 
 /* Zusätzliche spezifische Stile für .deck */
 .deck {
-  margin-top: 20px;
-  border: 2px solid #333;
-  border-radius: 10px;
-  padding: 10px;
+  border: 4px solid #fff;
+  padding: 20px; /* Vergrößern des Abstands */
+  width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
 }
 
 .deck-cards {
@@ -120,21 +144,108 @@
   width: 150px;
   height: auto;
 }
+
 /* Stile für den Deck-Zähler */
-.deck-count {
+.deck-info {
   font-size: 24px;
   font-weight: bold;
+  top: 10px;
+  left: 10px;
+  color: white;
+}
+
+/* Stile für die Filter-Container */
+.filters-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Stile für die Filter */
+.atk-def-filter,
+.race-attribute-filter {
+  margin-right: 20px;
+}
+
+.atk-def-filter label,
+.race-attribute-filter label {
+  font-size: 18px;
+}
+
+.atk-def-filter input,
+.atk-def-filter select,
+.race-attribute-filter select {
+  width: 100px;
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+}
+
+.atk-def-filter input[type="number"] {
+  width: 80px;
+}
+
+.race-attribute-filter select {
+  width: 120px;
+}
+
+/* Stile für die umgebende Container */
+.search-results-container,
+.selected-card-container,
+.deck-container {
+  border: 4px solid #fff;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
+  font-size: 24px;
+}
+
+/* Zusätzliche spezifische Stile für .main-container */
+.main-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.selected-card-container,
+.search-results-container,
+.deck-container {
+  width: 30%;
+  padding: 10px;
+}
+
+.selected-card-container,
+.search-results-container {
+  border: 4px solid #fff;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.selected-card-container .main-card {
+  text-align: center;
+}
+
+.deck-container .deck-box {
+  position: relative;
+}
+
+.deck-container .deck-box h2 {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #fff;
+  padding: 5px 10px;
+}
+
+.deck-container .deck-box .deck-count {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-/* Stile für .search-results */
-.search-results {
-  border: 4px solid black;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 20px;
-  max-height: 300px;
-  overflow-y: scroll;
-}
+
+
+
+
