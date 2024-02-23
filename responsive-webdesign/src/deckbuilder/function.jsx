@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CardModal from "../card/CardModal"; // Aktualisieren Sie den Pfad hier
 import "../deckbuilder/searchbar.css";
 
-const SearchBar = () => {
+const Function = () => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cardList, setCardList] = useState([]);
@@ -167,6 +167,7 @@ const SearchBar = () => {
         />
         <button onClick={fetchCards} style={{ color: "white", backgroundColor: "#007bff", border: "2px solid #007bff" }}>Search</button>
       </div>
+
       <div className="filters-container" style={{ color: "white" }}>
         <div className="atk-def-filter">
           <label style={{ color: "white" }}>ATK Range:</label>
@@ -325,4 +326,4 @@ const SearchBar = () => {
   );
 };
 
-export default SearchBar;
+export default Function;
