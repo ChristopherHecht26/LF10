@@ -3,7 +3,7 @@ import CardModal from "../card/CardModal"; // Aktualisieren Sie den Pfad hier
 
 import "../deckbuilder/searchbar.css";
 
-const SearchBar = () => {
+const Function = () => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [cardList, setCardList] = useState([]);
@@ -238,4 +238,4 @@ const SearchBar = () => {
   );
 };
 
-export default SearchBar;
+export default Function;

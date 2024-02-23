@@ -1,7 +1,7 @@
 import React from 'react';
-import LeftContainer from './LeftContainer';
-import MiddleContainer from './MiddleContainer';
-import RightContainer from './RightContainer';
+import LeftContainer from './left-container/LeftContainer';
+import MiddleContainer from './middle-container/MiddleContainer';
+import RightContainer from './right-container/RightContainer';
 
 const Container = () => {
   return (

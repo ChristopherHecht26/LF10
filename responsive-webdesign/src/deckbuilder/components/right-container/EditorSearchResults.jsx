@@ -1,11 +1,12 @@
 import React from 'react';
 import EditorSearchResult from './EditorSearchResult';
 
-const EditorSearchResults = () => {
+const EditorSearchResults = ({ searchResults }) => {
   return (
     <div className="editor-search-results">
-      <EditorSearchResult />
-      {/* Hier könntest du die Liste der gefundenen Karten mappen */}
+      {searchResults.map((result) => (
+        <EditorSearchResult key={result.id} card={result} />
+      ))}
     </div>
   );
 };
