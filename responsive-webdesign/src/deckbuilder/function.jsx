@@ -107,6 +107,30 @@ const SearchBar = () => {
           Search
         </button>
       </div>
+      <div className="search-results">
+        <h2>Search Results</h2>
+        <div
+          className="card-list"
+          style={{ maxHeight: "300px", overflowY: "scroll" }}
+        >
+          {filteredCardList.map((card) => (
+            <div
+              key={card.id}
+              className="card-item"
+              onDragStart={(e) => handleDragStart(e, card)}
+              draggable
+              onClick={() => setSelectedCard(card)}
+            >
+              <h3>{card.name}</h3>
+              <img
+                src={card.card_images[0].image_url_small}
+                alt={card.name}
+                style={{ width: "150px", height: "auto" }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="filter">
         <label style={{ fontSize: "20px" }}>
           Monster
