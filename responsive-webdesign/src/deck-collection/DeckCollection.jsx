@@ -1,3 +1,4 @@
+
 // DeckCollection.js
 import React, { useState, useEffect } from 'react';
 import DeckSearch from './DeckSearch';
@@ -39,8 +40,9 @@ const DeckCollection = () => {
         onAddToDeck={handleAddToDeck}
         onCloseModal={() => setShowModal(false)}
       />
+
     </div>
   );
-};
+}
 
-export default DeckCollection;
+export default App;
