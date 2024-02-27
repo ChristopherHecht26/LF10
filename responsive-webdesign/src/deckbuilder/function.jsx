@@ -302,7 +302,7 @@ const Function = () => {
             <img
               src={selectedCard.card_images[0].image_url_small}
               alt={selectedCard.name}
-              style={{ width: "600px", height: "auto" }}
+              style={{ width: "400px", height: "auto" }}
               onClick={() => handleCardSelection(selectedCard)} 
             />
             {<p>{selectedCardDescription}</p>}
@@ -352,11 +352,6 @@ const Function = () => {
   <h2 style={{ marginRight: "24px" }}>My Deck</h2>
   <div className="deck-count">Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60</div>
 </div>
-
-          
-          
-          
-     
 
 
 
