@@ -27,6 +27,19 @@ const Function = () => {
     fetchRacesAndAttributes();
   }, []);
 
+  const countCardsByType = (type) => {
+    return deck.reduce((total, card) => {
+      if (card.type === type) {
+        return total + card.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
+  useEffect(() => {
+    document.title = "YuGiOh!"; // Setze den Seitennamen
+  }, []);
+  
    const handleCardSelection = (card) => {
     setSelectedCard(card);
   };
@@ -82,7 +95,7 @@ const Function = () => {
     try {
       if (searchTerm.length >= 3) {
         const response = await fetch(
-          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${searchTerm}`
+          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(searchTerm)}&language=de`
         );
         const data = await response.json();
         setCardList(data.data);
@@ -154,30 +167,34 @@ const Function = () => {
     }
   };
 
-  // Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
-  const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
+// Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
+const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
+  if (
+    (filter.monster && card.type.toLowerCase().includes("monster")) ||
+    (filter.spell && card.type.toLowerCase().includes("spell")) ||
+    (filter.trap && card.type.toLowerCase().includes("trap"))
+  ) {
     if (
-      (filter.monster && card.type.toLowerCase().includes("monster")) ||
-      (filter.spell && card.frameType === "spell") ||
-      (filter.trap && card.frameType === "trap")
-    ) {
-      if (
+      (card.type.toLowerCase().includes("monster") &&
         card.atk >= filter.minATK &&
         card.atk <= filter.maxATK &&
         card.def >= filter.minDEF &&
-        card.def <= filter.maxDEF
+        card.def <= filter.maxDEF) ||
+      (!card.type.toLowerCase().includes("monster"))
+    ) {
+      if (
+        (filter.race === "" || card.race === filter.race) &&
+        (filter.attribute === "" || card.attribute === filter.attribute) &&
+        (filter.level === "" || card.level === parseInt(filter.level))
       ) {
-        if (
-          (filter.race === "" || card.race === filter.race) &&
-          (filter.attribute === "" || card.attribute === filter.attribute) &&
-          (filter.level === "" || card.level === parseInt(filter.level))
-        ) {
-          return true;
-        }
+        return true;
       }
     }
-    return false;
-  }) : [];
+  }
+  return false;
+}) : [];
+
+
 
   const handleClearDeck = () => {
     // Logik zum Löschen des Decks hier implementieren
@@ -356,6 +373,15 @@ const Function = () => {
 
 
 
+
+
+
+
+
+
+
+
+
           <div className="deck-box">
             <div className="deck-cards">
               {deck.map((card, index) => (
@@ -365,13 +391,14 @@ const Function = () => {
                   draggable
                   onDragStart={(e) => handleDragStart(e, card)}
                   onDragEnd={() => handleRemoveCardFromDeck(card.id)}
+                
                 >
                   {[...Array(card.quantity)].map((_, i) => (
                     <img
                       key={i}
                       src={card.card_images[0].image_url_small}
                       alt={card.name}
-                      style={{ width: "150px", height: "auto" }}
+                      style={{ width: "55px", height: "auto", margin: "0px" }}
                     />
                   ))}
                 </div>
