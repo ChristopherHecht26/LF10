@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import CardModal from "../card/CardModal"; // Aktualisieren Sie den Pfad hier
 import "../deckbuilder/searchbar.css";
 
 const Function = () => {
@@ -22,10 +21,48 @@ const Function = () => {
   const [races, setRaces] = useState([]);
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
+  const [selectedCardDescription, setSelectedCardDescription] = useState("");
 
   useEffect(() => {
     fetchRacesAndAttributes();
   }, []);
+
+  const countCardsByType = (type) => {
+    return deck.reduce((total, card) => {
+      if (card.type === type) {
+        return total + card.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
+  useEffect(() => {
+    document.title = "YuGiOh!"; // Setze den Seitennamen
+  }, []);
+  
+   const handleCardSelection = (card) => {
+    setSelectedCard(card);
+  };
+
+  useEffect(() => {
+    if (selectedCard) {
+      fetchCardDescription(selectedCard.id);
+    }
+  }, [selectedCard]);
+
+
+  const fetchCardDescription = async (cardId) => {
+    try {
+      const response = await fetch(
+        `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}`
+      );
+      const data = await response.json();
+      const description = data.data[0].desc || "No description available.";
+      setSelectedCardDescription(description);
+    } catch (error) {
+      console.error("Error fetching card description:", error);
+    }
+  };
 
   const fetchRacesAndAttributes = async () => {
     try {
@@ -58,7 +95,7 @@ const Function = () => {
     try {
       if (searchTerm.length >= 3) {
         const response = await fetch(
-          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${searchTerm}`
+          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(searchTerm)}&language=de`
         );
         const data = await response.json();
         setCardList(data.data);
@@ -130,32 +167,57 @@ const Function = () => {
     }
   };
 
-  // Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
-  const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
+// Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
+const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
+  if (
+    (filter.monster && card.type.toLowerCase().includes("monster")) ||
+    (filter.spell && card.type.toLowerCase().includes("spell")) ||
+    (filter.trap && card.type.toLowerCase().includes("trap"))
+  ) {
     if (
-      (filter.monster && card.type.toLowerCase().includes("monster")) ||
-      (filter.spell && card.frameType === "spell") ||
-      (filter.trap && card.frameType === "trap")
-    ) {
-      if (
+      (card.type.toLowerCase().includes("monster") &&
         card.atk >= filter.minATK &&
         card.atk <= filter.maxATK &&
         card.def >= filter.minDEF &&
-        card.def <= filter.maxDEF
+        card.def <= filter.maxDEF) ||
+      (!card.type.toLowerCase().includes("monster"))
+    ) {
+      if (
+        (filter.race === "" || card.race === filter.race) &&
+        (filter.attribute === "" || card.attribute === filter.attribute) &&
+        (filter.level === "" || card.level === parseInt(filter.level))
       ) {
-        if (
-          (filter.race === "" || card.race === filter.race) &&
-          (filter.attribute === "" || card.attribute === filter.attribute) &&
-          (filter.level === "" || card.level === parseInt(filter.level))
-        ) {
-          return true;
-        }
+        return true;
       }
     }
-    return false;
-  }) : [];
+  }
+  return false;
+}) : [];
+
+
+
+  const handleClearDeck = () => {
+    // Logik zum Löschen des Decks hier implementieren
+    setDeck([]);
+  };
+
+  const handleSaveDeck = () => {
+    // Logik zum Speichern der Deck-IDs hier implementieren
+    const deckIds = deck.map((card) => card.id);
+    console.log("Deck IDs:", deckIds);
+    // Hier können Sie die Deck-IDs weiterverarbeiten, z. B. in einer Datenbank speichern
+  };
 
   return (
+    <div>
+      <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white" }}>
+        <h1>Editing Deck: {/* Hier kommt die dynamische Variable für den Deck-Namen */}</h1>
+        <div>
+          <button onClick={handleClearDeck} className="editor-button" id="btnClear" style={{ marginRight: "10px" }}>Clear Deck</button>
+          <button onClick={handleSaveDeck} className="editor-button" id="btnSave" >Save Deck</button>
+        </div>
+      </div>
+
     <div className="search-bar-container">
       <div className="search-bar">
         <input
@@ -250,39 +312,57 @@ const Function = () => {
         </div>
       </div>
       <div className="main-container">
-        <div className="selected-card-container" style={{ color: "white" }}>
-          <h2>Selected Card</h2>
-          {selectedCard && (
-            <div className="main-card">
-              <img
-                src={selectedCard.card_images[0].image_url_small}
-                alt={selectedCard.name}
-                style={{ width: "600px", height: "auto" }} // Bildgröße erhöht
-              />
-            </div>
-          )}
-        </div>
-        <div className="search-results-container" style={{ color: "white" }}>
-          <h2>Search Results</h2>
-          <div className="card-list">
-            {filteredCardList.map((card) => (
-              <div
-                key={card.id}
-                className="card-item"
-                onDragStart={(e) => handleDragStart(e, card)}
-                draggable
-                onClick={() => setSelectedCard(card)}
-              >
-                <h3>{card.name}</h3>
-                <img
-                  src={card.card_images[0].image_url_small}
-                  alt={card.name}
-                  style={{ width: "150px", height: "auto" }}
-                />
-              </div>
-            ))}
+      <div className="selected-card-container" style={{ color: "white" }}>
+      <h2>{selectedCard ? selectedCard.name : "Selected Card"}</h2>
+        {selectedCard && (
+          <div className="main-card">
+            <img
+              src={selectedCard.card_images[0].image_url_small}
+              alt={selectedCard.name}
+              style={{ width: "400px", height: "auto" }}
+              onClick={() => handleCardSelection(selectedCard)} 
+            />
+            {<p>{selectedCardDescription}</p>}
           </div>
-        </div>
+        )}
+      </div>
+      <div className="search-results-container" style={{ color: "white" }}>
+      <h2>Search Results</h2>
+      <div className="card-list">
+        {filteredCardList.map((card) => (
+          <div
+            key={card.id}
+            className="card-item"
+            onDragStart={(e) => handleDragStart(e, card)}
+            draggable
+            onClick={() => setSelectedCard(card)}
+          >
+            <div className="card-content">
+              <img
+                src={card.card_images[0].image_url_small}
+                alt={card.name}
+                className="template-picture editor-search-card"
+              />
+              <div className="template-info">
+                <p className="editor-search-description">
+                  <span className="template-name">{card.name}</span><br />
+                  {card.type.toLowerCase() === "monster" && (
+                    <span className="template-if-monster">
+                      <span className="template-attribute">{card.attribute}</span>/
+                      <span className="template-race">{card.race}</span>{" "}
+                      {card.level && <span className="fa fa-star template-if-not-link"></span>}{" "}
+                      {card.level && <span className="template-level">{card.level}</span>}{" "}
+                      <span className="template-atk">{card.atk}</span>/
+                      <span className="template-def">{card.def}</span>
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
         <div className="deck-container" onDrop={handleDrop} onDragOver={handleDragOver} style={{ color: "white" }}>
           
         <div className="deck-info" style={{ display: "flex", alignItems: "center" , justifyContent: "space-between"}}>
@@ -290,10 +370,14 @@ const Function = () => {
   <div className="deck-count">Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60</div>
 </div>
 
-          
-          
-          
-     
+
+
+
+
+
+
+
+
 
 
 
@@ -307,13 +391,14 @@ const Function = () => {
                   draggable
                   onDragStart={(e) => handleDragStart(e, card)}
                   onDragEnd={() => handleRemoveCardFromDeck(card.id)}
+                
                 >
                   {[...Array(card.quantity)].map((_, i) => (
                     <img
                       key={i}
                       src={card.card_images[0].image_url_small}
                       alt={card.name}
-                      style={{ width: "150px", height: "auto" }}
+                      style={{ width: "55px", height: "auto", margin: "0px" }}
                     />
                   ))}
                 </div>
@@ -322,6 +407,7 @@ const Function = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

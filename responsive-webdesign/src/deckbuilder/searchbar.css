@@ -25,6 +25,7 @@ body {
   color: black; /* Schriftfarbe auf schwarz ändern */
 }
 
+
 .search-bar input[type="text"]:focus {
   border-color: #007bff;
 }
@@ -64,7 +65,7 @@ body {
 /* Gemeinsame Stile für .card-item und .deck-item */
 .card-item,
 .deck-item {
-  width: 150px;
+  width: 120px;
   margin: 10px;
   text-align: center;
   cursor: pointer;
@@ -120,7 +121,7 @@ body {
 .deck {
   border: 4px solid #fff;
   padding: 20px; /* Vergrößern des Abstands */
-  width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
+  width: 0%; /* Festlegen der Breite auf 30% des Elternelements */
 }
 
 .deck-cards {
@@ -138,6 +139,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.main-card p {
+  margin-top: 50px; 
+  white-space: pre-line;
+  width: 580px;
+  height: 400px;
+  font-size: 18px;
+
 }
 
 .deck-card img {
@@ -190,9 +200,17 @@ body {
   width: 120px;
 }
 
+.selected-card-container {
+  border: 4px solid #fff;
+  border-radius: 20px;
+  padding: 10px;
+  margin: 10px;
+  width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
+  font-size: 24px;
+}
+
 /* Stile für die umgebende Container */
 .search-results-container,
-.selected-card-container,
 .deck-container {
   border: 4px solid #fff;
   border-radius: 10px;
@@ -200,6 +218,8 @@ body {
   margin: 10px;
   width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
   font-size: 24px;
+  overflow-y: auto; /* Hinzufügen der Scrollleiste für den vertikalen Bereich */
+  max-height: 750px; /* Definieren Sie die maximale Höhe für den Bereich, bevor die Scrollleiste erscheint */
 }
 
 /* Zusätzliche spezifische Stile für .main-container */
@@ -224,7 +244,15 @@ body {
 }
 
 .selected-card-container .main-card {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selected-card-container .main-card img {
+  width: 75px;
+  height: auto;
+  margin: 0 auto; /* Zentriert das Bild horizontal */
 }
 
 .deck-container .deck-box {
@@ -245,7 +273,25 @@ body {
   left: 10px;
 }
 
+.editor-button {
+  padding: 15px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
+.editor-button:hover {
+  background-color: #0056b3;
+}
 
+#btnClear {
+  background-color: red;
+}
 
-
+#btnClear:hover {
+  background-color: darkred;
+}
