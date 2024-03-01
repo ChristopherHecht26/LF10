@@ -231,93 +231,137 @@ const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card
       </div>
 
       <div className="filters-container" style={{ color: "white" }}>
-        <div className="atk-def-filter">
-          <label style={{ color: "white" }}>ATK Range:</label>
-          <input
-            type="number"
-            name="minATK"
-            value={filter.minATK}
-            onChange={handleFilterChange}
-            placeholder="Min"
-          />
-          <input
-            type="number"
-            name="maxATK"
-            value={filter.maxATK}
-            onChange={handleFilterChange}
-            placeholder="Max"
-          />
-        </div>
-        <div className="atk-def-filter">
-          <label style={{ color: "white" }}>DEF Range:</label>
-          <input
-            type="number"
-            name="minDEF"
-            value={filter.minDEF}
-            onChange={handleFilterChange}
-            placeholder="Min"
-          />
-          <input
-            type="number"
-            name="maxDEF"
-            value={filter.maxDEF}
-            onChange={handleFilterChange}
-            placeholder="Max"
-          />
-        </div>
-        <div className="race-attribute-filter">
-          <label style={{ color: "white" }}>Race:</label>
-          <select
-            name="race"
-            value={filter.race}
-            onChange={handleFilterChange}
-          >
-            <option value="">All</option>
-            {races.map((race, index) => (
-              <option key={index} value={race}>
-                {race}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="race-attribute-filter">
-          <label style={{ color: "white" }}>Attribute:</label>
-          <select
-            name="attribute"
-            value={filter.attribute}
-            onChange={handleFilterChange}
-          >
-            <option value="">All</option>
-            {attributes.map((attribute, index) => (
-              <option key={index} value={attribute}>
-                {attribute}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="race-attribute-filter">
-          <label style={{ color: "white" }}>Level:</label>
-          <select
-            name="level"
-            value={filter.level}
-            onChange={handleFilterChange}
-          >
-            <option value="">All</option>
-            {levels.map((level, index) => (
-              <option key={index} value={level}>
-                {level}
-              </option>
-            ))}
-          </select>
-        </div>
+  <div>
+    <label style={{ marginRight: "10px" }}>Card Type:</label>
+    <select
+      name="cardType"
+      value={filter.cardType}
+      onChange={handleFilterChange}
+    >
+      <option value="all">All</option>
+      <option value="monster">Monster</option>
+      <option value="spell">Spell</option>
+      <option value="trap">Trap</option>
+    </select>
+  </div>
+  
+  {filter.cardType === "monster" && (
+    <>
+      <div className="atk-def-filter">
+        <label style={{ color: "white" }}>ATK Range:</label>
+        <input
+          type="number"
+          name="minATK"
+          value={filter.minATK}
+          onChange={handleFilterChange}
+          placeholder="Min"
+        />
+        <input
+          type="number"
+          name="maxATK"
+          value={filter.maxATK}
+          onChange={handleFilterChange}
+          placeholder="Max"
+        />
       </div>
+      <div className="atk-def-filter">
+        <label style={{ color: "white" }}>DEF Range:</label>
+        <input
+          type="number"
+          name="minDEF"
+          value={filter.minDEF}
+          onChange={handleFilterChange}
+          placeholder="Min"
+        />
+        <input
+          type="number"
+          name="maxDEF"
+          value={filter.maxDEF}
+          onChange={handleFilterChange}
+          placeholder="Max"
+        />
+      </div>
+      <div className="race-attribute-filter">
+        <label style={{ color: "white" }}>Race:</label>
+        <select
+          name="race"
+          value={filter.race}
+          onChange={handleFilterChange}
+        >
+          <option value="">All</option>
+          {races.map((race, index) => (
+            <option key={index} value={race}>
+              {race}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="race-attribute-filter">
+        <label style={{ color: "white" }}>Attribute:</label>
+        <select
+          name="attribute"
+          value={filter.attribute}
+          onChange={handleFilterChange}
+        >
+          <option value="">All</option>
+          {attributes.map((attribute, index) => (
+            <option key={index} value={attribute}>
+              {attribute}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="race-attribute-filter">
+        <label style={{ color: "white" }}>Level:</label>
+        <select
+          name="level"
+          value={filter.level}
+          onChange={handleFilterChange}
+        >
+          <option value="">All</option>
+          {levels.map((level, index) => (
+            <option key={index} value={level}>
+              {level}
+            </option>
+          ))}
+        </select>
+      </div>
+    </>
+  )}
+
+  <div>
+    <label style={{ marginRight: "10px" }}>Realtime Search:</label>
+    <input
+      type="checkbox"
+      name="realtimeSearch"
+      checked={filter.realtimeSearch}
+      onChange={handleFilterChange}
+    />
+  </div>
+
+  <div>
+    <label style={{ marginRight: "10px" }}>Results per page:</label>
+    <select
+      name="resultsPerPage"
+      value={filter.resultsPerPage}
+      onChange={handleFilterChange}
+    >
+      <option value="30">30</option>
+      <option value="50">50</option>
+      <option value="70">70</option>
+      <option value="90">90</option>
+      <option value="110">110</option>
+    </select>
+  </div>
+</div>
+
       <div className="main-container">
       <div className="selected-card-container" style={{ color: "white" }}>
       <h2>{selectedCard ? selectedCard.name : "Selected Card"}</h2>
         {selectedCard && (
           <div className="main-card">
             <img
-              src={selectedCard.card_images[0].image_url_small}
+              src={selectedCard.card_images[0].image_url}
               alt={selectedCard.name}
               style={{ width: "400px", height: "auto" }}
               onClick={() => handleCardSelection(selectedCard)} 
