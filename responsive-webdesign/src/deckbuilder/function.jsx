@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../deckbuilder/searchbar.css";
+import "../deckbuilder/function.css";
 
 const Function = () => {
   const [selectedCard, setSelectedCard] = useState(null);
@@ -22,8 +22,7 @@ const Function = () => {
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
   const [selectedCardDescription, setSelectedCardDescription] = useState("");
-  const [showModal, setShowModal] = useState(false); // Zustand für das Anzeigen des Modals
-  const [modalMessage, setModalMessage] = useState(""); // Zustand für die Modalnachricht
+  
 
   useEffect(() => {
     fetchRacesAndAttributes();

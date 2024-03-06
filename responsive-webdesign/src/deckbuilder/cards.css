@@ -1,0 +1,23 @@
+.card-list,
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 18px;
+}
+
+.card-item,
+.deck-item {
+  width: 120px;
+  margin: 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+/* Add other card styles here */
