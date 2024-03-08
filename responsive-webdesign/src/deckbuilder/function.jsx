@@ -245,6 +245,7 @@ const Function = () => {
               value={filter.maxATK}
               onChange={handleFilterChange}
               placeholder="Max"
+
             />
           </div>
           <div className="atk-def-filter">
