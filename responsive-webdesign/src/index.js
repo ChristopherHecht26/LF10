@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import DeckCollection from '../src/deck-collection/DeckCollection';
+import App from '../src/deck-collection/DeckCollection';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <DeckCollection />
+    <App />
   </React.StrictMode>
 );
 

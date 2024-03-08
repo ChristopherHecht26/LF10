@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../deck-collection/deckcollection.css';
-function App() {
+export function App() {
   const [deckName, setDeckName] = useState('');
   const [decks, setDecks] = useState([]);
 
