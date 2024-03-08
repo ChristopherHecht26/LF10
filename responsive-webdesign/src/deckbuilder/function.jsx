@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../deckbuilder/searchbar.css";
+import "../deckbuilder/function.css";
 
 const Function = () => {
   const [selectedCard, setSelectedCard] = useState(null);
@@ -22,25 +22,20 @@ const Function = () => {
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
   const [selectedCardDescription, setSelectedCardDescription] = useState("");
+  
 
   useEffect(() => {
     fetchRacesAndAttributes();
   }, []);
 
-  const countCardsByType = (type) => {
-    return deck.reduce((total, card) => {
-      if (card.type === type) {
-        return total + card.quantity;
-      }
-      return total;
-    }, 0);
-  };
+
+
 
   useEffect(() => {
     document.title = "YuGiOh!"; // Setze den Seitennamen
   }, []);
-  
-   const handleCardSelection = (card) => {
+
+  const handleCardSelection = (card) => {
     setSelectedCard(card);
   };
 
@@ -54,7 +49,7 @@ const Function = () => {
   const fetchCardDescription = async (cardId) => {
     try {
       const response = await fetch(
-        `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}`
+        `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`
       );
       const data = await response.json();
       const description = data.data[0].desc || "No description available.";
@@ -63,6 +58,8 @@ const Function = () => {
       console.error("Error fetching card description:", error);
     }
   };
+
+  
 
   const fetchRacesAndAttributes = async () => {
     try {
@@ -117,13 +114,13 @@ const Function = () => {
           ...deck.filter((c) => c.id !== card.id),
           { ...card, quantity: existingCard.quantity + 1 },
         ]);
-      } else {
-        alert("Maximum 3 cards of the same type allowed");
-      }
+      } 
     } else {
       setDeck([...deck, { ...card, quantity: 1 }]);
     }
   };
+
+
 
   const handleRemoveFromDeck = (cardId) => {
     const updatedDeck = deck.map((card) => {
@@ -167,34 +164,36 @@ const Function = () => {
     }
   };
 
-// Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
-const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
-  if (
-    (filter.monster && card.type.toLowerCase().includes("monster")) ||
-    (filter.spell && card.type.toLowerCase().includes("spell")) ||
-    (filter.trap && card.type.toLowerCase().includes("trap"))
-  ) {
+  // Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
+  const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
     if (
-      (card.type.toLowerCase().includes("monster") &&
-        card.atk >= filter.minATK &&
-        card.atk <= filter.maxATK &&
-        card.def >= filter.minDEF &&
-        card.def <= filter.maxDEF) ||
-      (!card.type.toLowerCase().includes("monster"))
+      (filter.monster && card.type.toLowerCase().includes("monster")) ||
+      (filter.spell && card.type.toLowerCase().includes("spell")) ||
+      (filter.trap && card.type.toLowerCase().includes("trap"))
     ) {
       if (
-        (filter.race === "" || card.race === filter.race) &&
-        (filter.attribute === "" || card.attribute === filter.attribute) &&
-        (filter.level === "" || card.level === parseInt(filter.level))
+        (card.type.toLowerCase().includes("monster") &&
+          card.atk >= filter.minATK &&
+          card.atk <= filter.maxATK &&
+          card.def >= filter.minDEF &&
+          card.def <= filter.maxDEF) ||
+        (!card.type.toLowerCase().includes("monster"))
       ) {
-        return true;
+        if (
+          (filter.race === "" || card.race === filter.race) &&
+          (filter.attribute === "" || card.attribute === filter.attribute) &&
+          (filter.level === "" || card.level === parseInt(filter.level))
+        ) {
+          return true;
+        }
       }
     }
-  }
-  return false;
-}) : [];
+    return false;
+  }) : [];
 
-
+  const handleSelectCardInDeck = (card) => {
+    setSelectedCard(card);
+  };
 
   const handleClearDeck = () => {
     // Logik zum Löschen des Decks hier implementieren
@@ -218,240 +217,189 @@ const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card
         </div>
       </div>
 
-    <div className="search-bar-container">
-      <div className="search-bar">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Enter card name..."
-          style={{ color: "black"}}
-        />
-        <button onClick={fetchCards} style={{ color: "white", backgroundColor: "#007bff", border: "2px solid #007bff" }}>Search</button>
-      </div>
+      <div className="search-bar-container">
+        <div className="search-bar">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter card name..."
+            style={{ color: "black" }}
+          />
+          <button onClick={fetchCards} style={{ color: "white", backgroundColor: "#007bff", border: "2px solid #007bff" }}>Search</button>
+        </div>
 
-      <div className="filters-container" style={{ color: "white" }}>
-  <div>
-    <label style={{ marginRight: "10px" }}>Card Type:</label>
-    <select
-      name="cardType"
-      value={filter.cardType}
-      onChange={handleFilterChange}
-    >
-      <option value="all">All</option>
-      <option value="monster">Monster</option>
-      <option value="spell">Spell</option>
-      <option value="trap">Trap</option>
-    </select>
-  </div>
-  
-  {filter.cardType === "monster" && (
-    <>
-      <div className="atk-def-filter">
-        <label style={{ color: "white" }}>ATK Range:</label>
-        <input
-          type="number"
-          name="minATK"
-          value={filter.minATK}
-          onChange={handleFilterChange}
-          placeholder="Min"
-        />
-        <input
-          type="number"
-          name="maxATK"
-          value={filter.maxATK}
-          onChange={handleFilterChange}
-          placeholder="Max"
-        />
-      </div>
-      <div className="atk-def-filter">
-        <label style={{ color: "white" }}>DEF Range:</label>
-        <input
-          type="number"
-          name="minDEF"
-          value={filter.minDEF}
-          onChange={handleFilterChange}
-          placeholder="Min"
-        />
-        <input
-          type="number"
-          name="maxDEF"
-          value={filter.maxDEF}
-          onChange={handleFilterChange}
-          placeholder="Max"
-        />
-      </div>
-      <div className="race-attribute-filter">
-        <label style={{ color: "white" }}>Race:</label>
-        <select
-          name="race"
-          value={filter.race}
-          onChange={handleFilterChange}
-        >
-          <option value="">All</option>
-          {races.map((race, index) => (
-            <option key={index} value={race}>
-              {race}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="race-attribute-filter">
-        <label style={{ color: "white" }}>Attribute:</label>
-        <select
-          name="attribute"
-          value={filter.attribute}
-          onChange={handleFilterChange}
-        >
-          <option value="">All</option>
-          {attributes.map((attribute, index) => (
-            <option key={index} value={attribute}>
-              {attribute}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="race-attribute-filter">
-        <label style={{ color: "white" }}>Level:</label>
-        <select
-          name="level"
-          value={filter.level}
-          onChange={handleFilterChange}
-        >
-          <option value="">All</option>
-          {levels.map((level, index) => (
-            <option key={index} value={level}>
-              {level}
-            </option>
-          ))}
-        </select>
-      </div>
-    </>
-  )}
-
-  <div>
-    <label style={{ marginRight: "10px" }}>Realtime Search:</label>
-    <input
-      type="checkbox"
-      name="realtimeSearch"
-      checked={filter.realtimeSearch}
-      onChange={handleFilterChange}
-    />
-  </div>
-
-  <div>
-    <label style={{ marginRight: "10px" }}>Results per page:</label>
-    <select
-      name="resultsPerPage"
-      value={filter.resultsPerPage}
-      onChange={handleFilterChange}
-    >
-      <option value="30">30</option>
-      <option value="50">50</option>
-      <option value="70">70</option>
-      <option value="90">90</option>
-      <option value="110">110</option>
-    </select>
-  </div>
-</div>
-
-      <div className="main-container">
-      <div className="selected-card-container" style={{ color: "white" }}>
-      <h2>{selectedCard ? selectedCard.name : "Selected Card"}</h2>
-        {selectedCard && (
-          <div className="main-card">
-            <img
-              src={selectedCard.card_images[0].image_url}
-              alt={selectedCard.name}
-              style={{ width: "400px", height: "auto" }}
-              onClick={() => handleCardSelection(selectedCard)} 
+        <div className="filters-container" style={{ color: "white" }}>
+          <div className="atk-def-filter">
+            <label style={{ color: "white" }}>ATK Range:</label>
+            <input
+              type="number"
+              name="minATK"
+              value={filter.minATK}
+              onChange={handleFilterChange}
+              placeholder="Min"
             />
-            {<p>{selectedCardDescription}</p>}
+            <input
+              type="number"
+              name="maxATK"
+              value={filter.maxATK}
+              onChange={handleFilterChange}
+              placeholder="Max"
+
+            />
           </div>
-        )}
-      </div>
-      <div className="search-results-container" style={{ color: "white" }}>
-      <h2>Search Results</h2>
-      <div className="card-list">
-        {filteredCardList.map((card) => (
-          <div
-            key={card.id}
-            className="card-item"
-            onDragStart={(e) => handleDragStart(e, card)}
-            draggable
-            onClick={() => setSelectedCard(card)}
-          >
-            <div className="card-content">
-              <img
-                src={card.card_images[0].image_url_small}
-                alt={card.name}
-                className="template-picture editor-search-card"
-              />
-              <div className="template-info">
-                <p className="editor-search-description">
-                  <span className="template-name">{card.name}</span><br />
-                  {card.type.toLowerCase() === "monster" && (
-                    <span className="template-if-monster">
-                      <span className="template-attribute">{card.attribute}</span>/
-                      <span className="template-race">{card.race}</span>{" "}
-                      {card.level && <span className="fa fa-star template-if-not-link"></span>}{" "}
-                      {card.level && <span className="template-level">{card.level}</span>}{" "}
-                      <span className="template-atk">{card.atk}</span>/
-                      <span className="template-def">{card.def}</span>
-                    </span>
-                  )}
-                </p>
+          <div className="atk-def-filter">
+            <label style={{ color: "white" }}>DEF Range:</label>
+            <input
+              type="number"
+              name="minDEF"
+              value={filter.minDEF}
+              onChange={handleFilterChange}
+              placeholder="Min"
+            />
+            <input
+              type="number"
+              name="maxDEF"
+              value={filter.maxDEF}
+              onChange={handleFilterChange}
+              placeholder="Max"
+            />
+          </div>
+          <div className="race-attribute-filter">
+            <label style={{ color: "white" }}>Race:</label>
+            <select
+              name="race"
+              value={filter.race}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              {races.map((race, index) => (
+                <option key={index} value={race}>
+                  {race}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="race-attribute-filter">
+            <label style={{ color: "white" }}>Attribute:</label>
+            <select
+              name="attribute"
+              value={filter.attribute}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              {attributes.map((attribute, index) => (
+                <option key={index} value={attribute}>
+                  {attribute}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="race-attribute-filter">
+            <label style={{ color: "white" }}>Level:</label>
+            <select
+              name="level"
+              value={filter.level}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              {levels.map((level, index) => (
+                <option key={index} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="main-container">
+          <div className="selected-card-container" style={{ color: "white" }}>
+            <h2>{selectedCard ? selectedCard.name : "Selected Card"}</h2>
+            {selectedCard && (
+              <div className="main-card">
+                <img
+                  src={selectedCard.card_images[0].image_url}
+                  alt={selectedCard.name}
+                  style={{ width: "400px", height: "auto" }}
+                  onClick={() => handleCardSelection(selectedCard)}
+                />
+                {<p>{selectedCardDescription}</p>}
               </div>
-            </div>
+            )}
           </div>
-        ))}
-      </div>
-    </div>
-        <div className="deck-container" onDrop={handleDrop} onDragOver={handleDragOver} style={{ color: "white" }}>
-          
-        <div className="deck-info" style={{ display: "flex", alignItems: "center" , justifyContent: "space-between"}}>
-  <h2 style={{ marginRight: "24px" }}>My Deck</h2>
-  <div className="deck-count">Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60</div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <div className="deck-box">
-            <div className="deck-cards">
-              {deck.map((card, index) => (
+          <div className="search-results-container" style={{ color: "white" }}>
+            <h2>Search Results</h2>
+            <div className="card-list">
+              {filteredCardList.map((card) => (
                 <div
-                  key={index}
-                  className="deck-card"
-                  draggable
+                  key={card.id}
+                  className="card-item"
                   onDragStart={(e) => handleDragStart(e, card)}
-                  onDragEnd={() => handleRemoveCardFromDeck(card.id)}
-                
+                  draggable
+                  onClick={() => setSelectedCard(card)}
                 >
-                  {[...Array(card.quantity)].map((_, i) => (
+                  <div className="card-content">
                     <img
-                      key={i}
                       src={card.card_images[0].image_url_small}
                       alt={card.name}
-                      style={{ width: "55px", height: "auto", margin: "0px" }}
+                      className="template-picture editor-search-card"
                     />
-                  ))}
+                    <div className="template-info">
+                      <p className="editor-search-description">
+                        <span className="template-name">{card.name}</span><br />
+                        {card.type.toLowerCase() === "monster" && (
+                          <span className="template-if-monster">
+                            <span className="template-attribute">{card.attribute}</span>/
+                            <span className="template-race">{card.race}</span>{" "}
+                            {card.level && <span className="fa fa-star template-if-not-link"></span>}{" "}
+                            {card.level && <span className="template-level">{card.level}</span>}{" "}
+                            <span className="template-atk">{card.atk}</span>/
+                            <span className="template-def">{card.def}</span>
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+          <div className="deck-container" onDrop={handleDrop} onDragOver={handleDragOver} style={{ color: "white" }}>
+
+            <div className="deck-info" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ marginRight: "24px" }}>My Deck</h2>
+              <div className="deck-count">
+                Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60
+              </div>
+            </div>
+
+            <div className="deck-box">
+              <div className="deck-cards">
+                {deck.map((card, index) => (
+                  <div
+                    key={index}
+                    className="deck-card"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, card)}
+                    onDragEnd={() => handleRemoveCardFromDeck(card.id)}
+                    onClick={() => handleSelectCardInDeck(card)} // Hier wird der onClick-Handler hinzugefügt
+                  >
+                    {[...Array(card.quantity)].map((_, i) => (
+                      <img
+                        key={i}
+                        src={card.card_images[0].image_url_small}
+                        alt={card.name}
+                        style={{ width: "55px", height: "auto", margin: "0px" }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
