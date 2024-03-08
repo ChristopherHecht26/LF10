@@ -1,11 +1,25 @@
+
 import React, { useState, useEffect } from "react";
 import "../deckbuilder/function.css";
+
+
+// Funktionen zum Laden von Decks aus dem lokalen Speicher
+const loadDecksFromLocalStorage = () => {
+  const savedDecksFromLocalStorage = localStorage.getItem('savedDecks');
+  if (savedDecksFromLocalStorage) {
+    return JSON.parse(savedDecksFromLocalStorage);
+  }
+  return [];
+};
 
 const Function = () => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDeck, setSelectedDeck] = useState(null);
   const [cardList, setCardList] = useState([]);
   const [deck, setDeck] = useState([]);
+  const [savedDecks, setSavedDecks] = useState([]);
+  const [deckName, setDeckName] = useState("");
   const [filter, setFilter] = useState({
     monster: true,
     spell: true,
@@ -22,14 +36,114 @@ const Function = () => {
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
   const [selectedCardDescription, setSelectedCardDescription] = useState("");
-  
+
+  const saveDeckToCSV = (deckName, deck) => {
+    const csvContent = `${deckName},${deck.map(card => card.id).join(',')}\n`;
+    // Hier den Code einfügen, um csvContent in eine Datei zu schreiben
+  };
+
+  const handleSelectDeck = (deckName, deck) => {
+    setSelectedDeck({ name: deckName, cards: deck });
+  };
+
+  const deleteDeck = (deckName) => {
+    const updatedSavedDecks = savedDecks.filter((deck) => deck.name !== deckName);
+    localStorage.setItem('savedDecks', JSON.stringify(updatedSavedDecks));
+    setSavedDecks(updatedSavedDecks);
+  };
+
+  const loadDecksFromCSV = () => {
+    // Hier den Code einfügen, um Decks aus der CSV-Datei zu lesen und zurückzugeben
+  };
+  useEffect(() => {
+    // Laden der gespeicherten Decks aus dem lokalen Speicher
+    const savedDecksFromLocalStorage = localStorage.getItem('savedDecks');
+    if (savedDecksFromLocalStorage) {
+      setSavedDecks(JSON.parse(savedDecksFromLocalStorage));
+    }
+  }, []);
+
+  const loadDeck = async (savedDeck) => {
+    try {
+      // Deck-Name setzen
+      setDeckName(savedDeck.name);
+
+      // Karteninformationen für jedes Deck laden
+      const deckPromises = Object.keys(savedDeck.cards).map(async (cardId) => {
+        const response = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`);
+        const data = await response.json();
+        // Überprüfen, ob Daten vorhanden und die Karte mit ihrer Anzahl zurückgeben
+        if (data && data.data && data.data.length > 0) {
+          return { ...data.data[0], quantity: savedDeck.cards[cardId].quantity };
+        } else {
+          console.error(`No data found for card with ID ${cardId}`);
+          return null;
+        }
+      });
+
+      // Warte auf alle Karteninformationen und aktualisiere das Deck
+      const loadedDeck = await Promise.all(deckPromises);
+      // Filtere Nullwerte heraus, falls eine Karte nicht geladen werden konnte
+      const filteredDeck = loadedDeck.filter(card => card !== null);
+      setDeck(filteredDeck);
+    } catch (error) {
+      console.error("Error loading deck:", error);
+    }
+  };
 
   useEffect(() => {
-    fetchRacesAndAttributes();
+    const savedDecksFromLocalStorage = localStorage.getItem('savedDecks');
+    if (savedDecksFromLocalStorage) {
+      setSavedDecks(JSON.parse(savedDecksFromLocalStorage));
+    }
   }, []);
 
 
 
+  const saveDeckToLocalStorage = (deckName, deck) => {
+    const deckData = deck.reduce((acc, card) => {
+      if (acc[card.id]) {
+        acc[card.id].quantity += card.quantity;
+      } else {
+        acc[card.id] = { ...card, quantity: card.quantity };
+      }
+      return acc;
+    }, {});
+
+
+    const updatedSavedDecks = [...savedDecks, { name: deckName, cards: deckData }];
+    localStorage.setItem('savedDecks', JSON.stringify(updatedSavedDecks));
+    setSavedDecks(updatedSavedDecks);
+  };
+
+  const loadDecksFromLocalStorage = () => {
+    const savedDecksFromLocalStorage = localStorage.getItem('savedDecks');
+    if (savedDecksFromLocalStorage) {
+      return JSON.parse(savedDecksFromLocalStorage);
+    }
+    return [];
+  };
+
+
+
+  const handleSaveDeck = async () => {
+    const deckName = prompt("Enter a name for the deck:");
+    if (deckName && deckName.trim() !== "") {
+      saveDeckToLocalStorage(deckName, deck);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchRacesAndAttributes();
+    const savedDecks = loadDecksFromCSV();
+    // Hier die Logik einfügen, um die geladenen Decks zu verarbeiten und anzuzeigen
+  }, []);
+
+
+  const handleDeckNameChange = (event) => {
+    setDeckName(event.target.value);
+  };
 
   useEffect(() => {
     document.title = "YuGiOh!"; // Setze den Seitennamen
@@ -59,7 +173,7 @@ const Function = () => {
     }
   };
 
-  
+
 
   const fetchRacesAndAttributes = async () => {
     try {
@@ -107,14 +221,13 @@ const Function = () => {
   }, [searchTerm]);
 
   const handleAddToDeck = (card) => {
-    const existingCard = deck.find((c) => c.id === card.id);
-    if (existingCard) {
-      if (existingCard.quantity < 3) {
-        setDeck([
-          ...deck.filter((c) => c.id !== card.id),
-          { ...card, quantity: existingCard.quantity + 1 },
-        ]);
-      } 
+    const existingCardIndex = deck.findIndex((c) => c.id === card.id);
+    if (existingCardIndex !== -1) {
+      const updatedDeck = [...deck];
+      if (updatedDeck[existingCardIndex].quantity < 3) {
+        updatedDeck[existingCardIndex].quantity += 1;
+        setDeck(updatedDeck);
+      }
     } else {
       setDeck([...deck, { ...card, quantity: 1 }]);
     }
@@ -125,17 +238,14 @@ const Function = () => {
   const handleRemoveFromDeck = (cardId) => {
     const updatedDeck = deck.map((card) => {
       if (card.id === cardId) {
-        if (card.quantity > 1) {
-          return { ...card, quantity: card.quantity - 1 };
-        } else {
-          // Wenn die Kartenmenge auf 1 fällt oder darunter, entfernen Sie die Karte aus dem Deck
-          return null;
-        }
+        return { ...card, quantity: card.quantity - 1 };
       }
       return card;
-    }).filter(Boolean); // Entfernen Sie null-Einträge aus dem aktualisierten Deck
+    }).filter((card) => card.quantity > 0);
     setDeck(updatedDeck);
   };
+
+
 
   const handleDragStart = (event, card) => {
     event.dataTransfer.setData("card", JSON.stringify(card));
@@ -200,21 +310,42 @@ const Function = () => {
     setDeck([]);
   };
 
-  const handleSaveDeck = () => {
-    // Logik zum Speichern der Deck-IDs hier implementieren
-    const deckIds = deck.map((card) => card.id);
-    console.log("Deck IDs:", deckIds);
-    // Hier können Sie die Deck-IDs weiterverarbeiten, z. B. in einer Datenbank speichern
-  };
 
   return (
-    <div>
-      <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white" }}>
-        <h1>Editing Deck: {/* Hier kommt die dynamische Variable für den Deck-Namen */}</h1>
+    <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white" }}>
+      <h1>Editing Deck: {deckName}</h1>
+      <div>
         <div>
-          <button onClick={handleClearDeck} className="editor-button" id="btnClear" style={{ marginRight: "10px" }}>Clear Deck</button>
-          <button onClick={handleSaveDeck} className="editor-button" id="btnSave" >Save Deck</button>
+          <div>
+            {savedDecks.map((savedDeck, index) => (
+              <div key={index}>
+                <span>{savedDeck.name}</span>
+                <button onClick={() => deleteDeck(savedDeck.name)}>Delete</button>
+              </div>
+            ))}
+            {/* Anzeigen der gespeicherten Decks als Dropdown-Menü */}
+            <select value={deckName} onChange={(e) => setDeckName(e.target.value)}>
+              <option value="">Select a saved deck</option>
+              {savedDecks.map((savedDeck, index) => (
+                <option key={index} value={savedDeck.name}>
+                  {savedDeck.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Anzeigen des aktuellen Decks */}
+         
+          </div>
+
+          {savedDecks.map(savedDeck => (
+            <button key={savedDeck.name} onClick={() => loadDeck(savedDeck)}>
+              {savedDeck.name}
+            </button>
+          ))}
         </div>
+        <button onClick={handleClearDeck} className="editor-button" id="btnClear" style={{ marginRight: "10px" }}>Clear Deck</button>
+        <button onClick={handleSaveDeck} className="editor-button" id="btnSave" >Save Deck</button>
+
       </div>
 
       <div className="search-bar-container">
@@ -374,33 +505,33 @@ const Function = () => {
             <div className="deck-box">
               <div className="deck-cards">
                 {deck.map((card, index) => (
-                  <div
-                    key={index}
-                    className="deck-card"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, card)}
-                    onDragEnd={() => handleRemoveCardFromDeck(card.id)}
-                    onClick={() => handleSelectCardInDeck(card)} // Hier wird der onClick-Handler hinzugefügt
-                  >
-                    {[...Array(card.quantity)].map((_, i) => (
-                      <img
-                        key={i}
-                        src={card.card_images[0].image_url_small}
-                        alt={card.name}
-                        style={{ width: "55px", height: "auto", margin: "0px" }}
-                      />
-                    ))}
-                  </div>
+                  Array.from({ length: card.quantity }, (_, i) => (
+                    <div
+                      key={`${card.id}-${i}`}
+                      className="deck-card"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, card)}
+                      onDragEnd={() => handleRemoveCardFromDeck(card.id)}
+                      onClick={() => handleSelectCardInDeck(card)} // Hier wird der onClick-Handler hinzugefügt
+                    >
+                      {card.card_images && card.card_images.length > 0 && (
+                        <img
+                          src={card.card_images[0].image_url_small}
+                          alt={card.name}
+                          style={{ width: "85px", height: "auto", margin: "0px"  }}
+                        />
+                      )}
+                    </div>
+                  ))
                 ))}
               </div>
             </div>
-
-
           </div>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default Function;
