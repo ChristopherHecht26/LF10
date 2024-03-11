@@ -22,7 +22,9 @@ const Function = () => {
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
   const [selectedCardDescription, setSelectedCardDescription] = useState("");
-  
+  const [deckName, setDeckName] = useState(""); // Zustand für den Decknamen
+  const [promptOpen, setPromptOpen] = useState(false);
+
 
   useEffect(() => {
     fetchRacesAndAttributes();
@@ -120,6 +122,51 @@ const Function = () => {
     }
   };
 
+  const handleOpenDeck = () => {
+    // Verstecktes input-Element erstellen
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+
+    // Event-Listener hinzufügen, um auf die ausgewählte Datei zuzugreifen
+    fileInput.addEventListener("change", handleFileSelect);
+
+    // Klick auf das versteckte input-Element auslösen
+    fileInput.click();
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+  
+    if (file) {
+      const reader = new FileReader();
+  
+      reader.onload = (e) => {
+        try {
+          const deckData = JSON.parse(e.target.result);
+  
+          // Überprüfen, ob jede Karte in deckData das erwartete Format hat
+          if (deckData.every((card) => card.id && card.quantity && card.card_images)) {
+            // Logik zum Laden der Karten ins Deck hier implementieren
+            const cardsInDeck = deckData.map(({ id, quantity }) => ({
+              ...cardList.find((card) => card.id === id),
+              quantity,
+            }));
+  
+            setDeck(cardsInDeck);
+          } else {
+            console.error("Invalid deck format.");
+          }
+        } catch (error) {
+          console.error("Error reading file:", error);
+        }
+      };
+  
+      // Die Datei als Text lesen
+      reader.readAsText(file);
+    }
+  };
+
 
 
   const handleRemoveFromDeck = (cardId) => {
@@ -201,19 +248,81 @@ const Function = () => {
   };
 
   const handleSaveDeck = () => {
+    if (!promptOpen) {
+      // Der Benutzer hat noch nicht nach dem Deck-Namen gefragt, zeige das Prompt an
+      const deckName = prompt("Bitte geben Sie einen Namen für das Deck ein:");
+
+      if (!deckName) {
+        // Der Benutzer hat "Abbrechen" geklickt oder kein Namen eingegeben
+        return;
+      }
+
+      // Setze den Deck-Namen im State
+      setPromptOpen(true);
+
+      // Speichere das Deck mit dem eingegebenen Namen
+      saveDeck(deckName);
+    }
+  };
+
+
+  const saveDeck = (deckName) => {
     // Logik zum Speichern der Deck-IDs hier implementieren
-    const deckIds = deck.map((card) => card.id);
-    console.log("Deck IDs:", deckIds);
-    // Hier können Sie die Deck-IDs weiterverarbeiten, z. B. in einer Datenbank speichern
+    const deckData = deck.map((card) => ({
+      id: card.id,
+      quantity: card.quantity,
+      card_images: [
+        {
+          image_url: card.image_url,
+          image_url_small: card.image_url_small
+        }
+      ]
+    }));
+
+    console.log("Deck Data:", deckData);
+
+    // Erstellen Sie die JSON-Struktur mit den Deck-IDs
+    const jsonData = JSON.stringify(deckData, null, 2);
+
+    // Erstellen Sie einen Blob mit dem JSON-Daten
+    const blob = new Blob([jsonData], { type: "application/json" });
+
+    // Erstellen Sie einen Download-Link für die JSON-Datei
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    // Verwende den eingegebenen Deck-Namen für den Download-Link
+    a.href = url;
+    a.download = `${deckName}_deck.json`;
+
+    // Vor dem Hinzufügen des neuen Links entfernen Sie das vorherige DOM-Element, falls vorhanden
+    const previousLink = document.querySelector("#download-link");
+    if (previousLink) {
+      document.body.removeChild(previousLink);
+    }
+
+    // Setzen Sie eine eindeutige ID, um das Element später zu identifizieren
+    a.id = "download-link";
+
+    // Führen Sie den Klick auf den Link aus, um den Download zu starten
+    a.click();
+
+    // Bereinigen Sie den erstellten URL
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div>
       <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white" }}>
-        <h1>Editing Deck: {/* Hier kommt die dynamische Variable für den Deck-Namen */}</h1>
+        <h1>Editing Deck: {deckName}</h1>
         <div>
-          <button onClick={handleClearDeck} className="editor-button" id="btnClear" style={{ marginRight: "10px" }}>Clear Deck</button>
-          <button onClick={handleSaveDeck} className="editor-button" id="btnSave" >Save Deck</button>
+          <button onClick={handleClearDeck} className="editor-button" id="btnClear" >Clear Deck</button>
+          <button onClick={handleSaveDeck} className="editor-button" id="btnSave">
+            Save Deck
+          </button>
+          <button onClick={handleOpenDeck} className="editor-button" id="btnOpen">
+            Open Deck
+          </button>
         </div>
       </div>
 
