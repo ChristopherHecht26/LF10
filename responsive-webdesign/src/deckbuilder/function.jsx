@@ -251,7 +251,7 @@ const Function = () => {
     if (!promptOpen) {
       // Der Benutzer hat noch nicht nach dem Deck-Namen gefragt, zeige das Prompt an
       const deckName = prompt("Bitte geben Sie einen Namen für das Deck ein:");
-
+      setDeckName(deckName);
       if (!deckName) {
         // Der Benutzer hat "Abbrechen" geklickt oder kein Namen eingegeben
         return;
@@ -268,45 +268,43 @@ const Function = () => {
 
   const saveDeck = (deckName) => {
     // Logik zum Speichern der Deck-IDs hier implementieren
-    const deckData = deck.map((card) => ({
-      id: card.id,
-      quantity: card.quantity,
-      card_images: [
-        {
-          image_url: card.image_url,
-          image_url_small: card.image_url_small
-        }
-      ]
-    }));
-
+    const deckData = deck.map((card) => {
+      
+      const images = card.card_images || [{ image_url: card.image_url, image_url_small: card.image_url_small }];
+      return {
+        quantity: card.quantity,
+        id: card.id,
+        card_images: images.map(({ image_url, image_url_small }) => ({ image_url, image_url_small })),
+      };
+    });
     console.log("Deck Data:", deckData);
-
+  
     // Erstellen Sie die JSON-Struktur mit den Deck-IDs
     const jsonData = JSON.stringify(deckData, null, 2);
-
+  
     // Erstellen Sie einen Blob mit dem JSON-Daten
     const blob = new Blob([jsonData], { type: "application/json" });
-
+  
     // Erstellen Sie einen Download-Link für die JSON-Datei
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-
-    // Verwende den eingegebenen Deck-Namen für den Download-Link
+  
+    // Verwenden Sie den eingegebenen Deck-Namen für den Download-Link
     a.href = url;
     a.download = `${deckName}_deck.json`;
-
+  
     // Vor dem Hinzufügen des neuen Links entfernen Sie das vorherige DOM-Element, falls vorhanden
     const previousLink = document.querySelector("#download-link");
     if (previousLink) {
       document.body.removeChild(previousLink);
     }
-
+  
     // Setzen Sie eine eindeutige ID, um das Element später zu identifizieren
     a.id = "download-link";
-
+  
     // Führen Sie den Klick auf den Link aus, um den Download zu starten
     a.click();
-
+  
     // Bereinigen Sie den erstellten URL
     URL.revokeObjectURL(url);
   };
