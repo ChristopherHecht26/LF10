@@ -22,23 +22,22 @@ const Function = () => {
   const [attributes, setAttributes] = useState([]);
   const [levels, setLevels] = useState([]);
   const [selectedCardDescription, setSelectedCardDescription] = useState("");
-  const [deckName, setDeckName] = useState(""); // Zustand für den Decknamen
+  const [selectedCardName, setSelectedCardName] = useState(""); // Zustand für den ausgewählten Kartenname
+  const [deckName, setDeckName] = useState("");
   const [promptOpen, setPromptOpen] = useState(false);
-
 
   useEffect(() => {
     fetchRacesAndAttributes();
   }, []);
 
-
-
-
   useEffect(() => {
-    document.title = "YuGiOh!"; // Setze den Seitennamen
+    document.title = "YuGiOh!";
   }, []);
 
   const handleCardSelection = (card) => {
     setSelectedCard(card);
+    setSelectedCardName(card.name); // Aktualisiere den ausgewählten Kartenname
+    fetchCardDescription(card.id);
   };
 
   useEffect(() => {
@@ -47,21 +46,24 @@ const Function = () => {
     }
   }, [selectedCard]);
 
-
   const fetchCardDescription = async (cardId) => {
-    try {
-      const response = await fetch(
-        `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`
-      );
-      const data = await response.json();
-      const description = data.data[0].desc || "No description available.";
-      setSelectedCardDescription(description);
-    } catch (error) {
-      console.error("Error fetching card description:", error);
+  try {
+    const response = await fetch(
+      `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`
+    );
+    const data = await response.json();
+    const description = data.data[0].desc || "No description available.";
+    setSelectedCardDescription(description);
+    setSelectedCard({ ...selectedCard, name: data.data[0].name, image_url: null }); // Update selectedCard with new data
+    // Überprüfen, ob die Karte Bilder hat
+    if (data.data[0].card_images.length > 0) {
+      const imageUrl = data.data[0].card_images[0].image_url;
+      setSelectedCard((prevSelectedCard) => ({ ...prevSelectedCard, image_url: imageUrl }));
     }
-  };
-
-  
+  } catch (error) {
+    console.error("Error fetching card description:", error);
+  }
+};
 
   const fetchRacesAndAttributes = async () => {
     try {
@@ -81,7 +83,7 @@ const Function = () => {
       });
       const racesArray = Array.from(racesSet);
       const attributesArray = Array.from(attributesSet);
-      const levelsArray = Array.from(levelsSet).sort((a, b) => a - b); // Sortiere Level aufsteigend
+      const levelsArray = Array.from(levelsSet).sort((a, b) => a - b);
       setRaces(racesArray);
       setAttributes(attributesArray);
       setLevels(levelsArray);
@@ -94,7 +96,9 @@ const Function = () => {
     try {
       if (searchTerm.length >= 3) {
         const response = await fetch(
-          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(searchTerm)}&language=de`
+          `https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(
+            searchTerm
+          )}&language=de`
         );
         const data = await response.json();
         setCardList(data.data);
@@ -116,71 +120,34 @@ const Function = () => {
           ...deck.filter((c) => c.id !== card.id),
           { ...card, quantity: existingCard.quantity + 1 },
         ]);
-      } 
+      }
     } else {
       setDeck([...deck, { ...card, quantity: 1 }]);
     }
   };
 
   const handleOpenDeck = () => {
-    // Verstecktes input-Element erstellen
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".json";
-
-    // Event-Listener hinzufügen, um auf die ausgewählte Datei zuzugreifen
     fileInput.addEventListener("change", handleFileSelect);
-
-    // Klick auf das versteckte input-Element auslösen
     fileInput.click();
   };
 
-  const handleFileSelect = (event) => {
-    const file = event.target.files[0];
   
-    if (file) {
-      const reader = new FileReader();
-  
-      reader.onload = (e) => {
-        try {
-          const deckData = JSON.parse(e.target.result);
-  
-          // Überprüfen, ob jede Karte in deckData das erwartete Format hat
-          if (deckData.every((card) => card.id && card.quantity && card.card_images)) {
-            // Logik zum Laden der Karten ins Deck hier implementieren
-            const cardsInDeck = deckData.map(({ id, quantity }) => ({
-              ...cardList.find((card) => card.id === id),
-              quantity,
-            }));
-  
-            setDeck(cardsInDeck);
-          } else {
-            console.error("Invalid deck format.");
-          }
-        } catch (error) {
-          console.error("Error reading file:", error);
-        }
-      };
-  
-      // Die Datei als Text lesen
-      reader.readAsText(file);
-    }
-  };
-
-
-
   const handleRemoveFromDeck = (cardId) => {
-    const updatedDeck = deck.map((card) => {
-      if (card.id === cardId) {
-        if (card.quantity > 1) {
-          return { ...card, quantity: card.quantity - 1 };
-        } else {
-          // Wenn die Kartenmenge auf 1 fällt oder darunter, entfernen Sie die Karte aus dem Deck
-          return null;
+    const updatedDeck = deck
+      .map((card) => {
+        if (card.id === cardId) {
+          if (card.quantity > 1) {
+            return { ...card, quantity: card.quantity - 1 };
+          } else {
+            return null;
+          }
         }
-      }
-      return card;
-    }).filter(Boolean); // Entfernen Sie null-Einträge aus dem aktualisierten Deck
+        return card;
+      })
+      .filter(Boolean);
     setDeck(updatedDeck);
   };
 
@@ -211,116 +178,131 @@ const Function = () => {
     }
   };
 
-  // Überprüfen Sie, ob cardList definiert ist, bevor Sie filteredCardList erstellen
-  const filteredCardList = cardList && cardList.length > 0 ? cardList.filter((card) => {
-    if (
-      (filter.monster && card.type.toLowerCase().includes("monster")) ||
-      (filter.spell && card.type.toLowerCase().includes("spell")) ||
-      (filter.trap && card.type.toLowerCase().includes("trap"))
-    ) {
-      if (
-        (card.type.toLowerCase().includes("monster") &&
-          card.atk >= filter.minATK &&
-          card.atk <= filter.maxATK &&
-          card.def >= filter.minDEF &&
-          card.def <= filter.maxDEF) ||
-        (!card.type.toLowerCase().includes("monster"))
-      ) {
-        if (
-          (filter.race === "" || card.race === filter.race) &&
-          (filter.attribute === "" || card.attribute === filter.attribute) &&
-          (filter.level === "" || card.level === parseInt(filter.level))
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }) : [];
+  const filteredCardList =
+    cardList && cardList.length > 0
+      ? cardList.filter((card) => {
+          if (
+            (filter.monster && card.type.toLowerCase().includes("monster")) ||
+            (filter.spell && card.type.toLowerCase().includes("spell")) ||
+            (filter.trap && card.type.toLowerCase().includes("trap"))
+          ) {
+            if (
+              (card.type.toLowerCase().includes("monster") &&
+                card.atk >= filter.minATK &&
+                card.atk <= filter.maxATK &&
+                card.def >= filter.minDEF &&
+                card.def <= filter.maxDEF) ||
+              !card.type.toLowerCase().includes("monster")
+            ) {
+              if (
+                (filter.race === "" || card.race === filter.race) &&
+                (filter.attribute === "" || card.attribute === filter.attribute) &&
+                (filter.level === "" || card.level === parseInt(filter.level))
+              ) {
+                return true;
+              }
+            }
+          }
+          return false;
+        })
+      : [];
 
   const handleSelectCardInDeck = (card) => {
     setSelectedCard(card);
+    setSelectedCardName(card.name); // Aktualisiere den ausgewählten Kartenname
   };
 
   const handleClearDeck = () => {
-    // Logik zum Löschen des Decks hier implementieren
     setDeck([]);
   };
 
   const handleSaveDeck = () => {
     if (!promptOpen) {
-      // Der Benutzer hat noch nicht nach dem Deck-Namen gefragt, zeige das Prompt an
       const deckName = prompt("Bitte geben Sie einen Namen für das Deck ein:");
       setDeckName(deckName);
       if (!deckName) {
-        // Der Benutzer hat "Abbrechen" geklickt oder kein Namen eingegeben
         return;
       }
-
-      // Setze den Deck-Namen im State
       setPromptOpen(true);
-
-      // Speichere das Deck mit dem eingegebenen Namen
       saveDeck(deckName);
     }
   };
-
-
+  
   const saveDeck = (deckName) => {
-    // Logik zum Speichern der Deck-IDs hier implementieren
     const deckData = deck.map((card) => {
-      
       const images = card.card_images || [{ image_url: card.image_url, image_url_small: card.image_url_small }];
       return {
         quantity: card.quantity,
         id: card.id,
+        name: card.name, // Kartennamen hinzufügen
+        description: card.description, // Kartendetails hinzufügen
         card_images: images.map(({ image_url, image_url_small }) => ({ image_url, image_url_small })),
       };
     });
     console.log("Deck Data:", deckData);
   
-    // Erstellen Sie die JSON-Struktur mit den Deck-IDs
     const jsonData = JSON.stringify(deckData, null, 2);
-  
-    // Erstellen Sie einen Blob mit dem JSON-Daten
     const blob = new Blob([jsonData], { type: "application/json" });
-  
-    // Erstellen Sie einen Download-Link für die JSON-Datei
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
   
-    // Verwenden Sie den eingegebenen Deck-Namen für den Download-Link
     a.href = url;
     a.download = `${deckName}_deck.json`;
   
-    // Vor dem Hinzufügen des neuen Links entfernen Sie das vorherige DOM-Element, falls vorhanden
     const previousLink = document.querySelector("#download-link");
     if (previousLink) {
       document.body.removeChild(previousLink);
     }
   
-    // Setzen Sie eine eindeutige ID, um das Element später zu identifizieren
     a.id = "download-link";
   
-    // Führen Sie den Klick auf den Link aus, um den Download zu starten
     a.click();
   
-    // Bereinigen Sie den erstellten URL
     URL.revokeObjectURL(url);
   };
-
+  
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+  
+    if (file) {
+      const reader = new FileReader();
+  
+      reader.onload = (e) => {
+        try {
+          const deckData = JSON.parse(e.target.result);
+  
+          if (Array.isArray(deckData)) {
+            const cardsInDeck = deckData.map(({ id, quantity, name, description, card_images }) => ({
+              id,
+              quantity,
+              name,
+              description,
+              card_images: [{ image_url_small: card_images[0].image_url_small }],
+            }));
+  
+            setDeck(cardsInDeck);
+            setDeckName(deckName);
+          } else {
+            console.error("Invalid deck format.");
+          }
+        } catch (error) {
+          console.error("Error reading file:", error);
+        }
+      };
+  
+      reader.readAsText(file);
+    }
+  };
+  
   return (
     <div>
-      <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white" }}>
+      <div className="editor-menu-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", color: "white", flexDirection: "column" }}>
         <h1>Editing Deck: {deckName}</h1>
+        
         <div>
-          <button onClick={handleClearDeck} className="editor-button" id="btnClear" >Clear Deck</button>
-          <button onClick={handleSaveDeck} className="editor-button" id="btnSave">
-            Save Deck
-          </button>
-          <button onClick={handleOpenDeck} className="editor-button" id="btnOpen">
-            Open Deck
-          </button>
+          <button onClick={handleClearDeck} className="editor-button" id="btnClear">Clear Deck</button>
+          <button onClick={handleSaveDeck} className="editor-button" id="btnSave">Save Deck</button>
+          <button onClick={handleOpenDeck} className="editor-button" id="btnOpen">Open Deck</button>
         </div>
       </div>
 
@@ -419,20 +401,20 @@ const Function = () => {
           </div>
         </div>
         <div className="main-container">
-          <div className="selected-card-container" style={{ color: "white" }}>
-            <h2>{selectedCard ? selectedCard.name : "Selected Card"}</h2>
-            {selectedCard && (
-              <div className="main-card">
-                <img
-                  src={selectedCard.card_images[0].image_url}
-                  alt={selectedCard.name}
-                  style={{ width: "400px", height: "auto" }}
-                  onClick={() => handleCardSelection(selectedCard)}
-                />
-                {<p>{selectedCardDescription}</p>}
-              </div>
-            )}
+        <div className="selected-card-container" style={{ color: "white" }}>
+        <h2>{selectedCardName ? selectedCardName : "Selected Card"}</h2>
+        {selectedCard && (
+          <div className="main-card">
+            <img
+              src={selectedCard.image_url || 'Standard-URL-hier'}
+              alt={selectedCard.name}
+              style={{ width: "400px", height: "auto" }}
+              onClick={() => handleCardSelection(selectedCard)}                 
+            />
+            {<p>{selectedCardDescription}</p>}
           </div>
+        )}
+      </div>
           <div className="search-results-container" style={{ color: "white" }}>
             <h2>Search Results</h2>
             <div className="card-list">
@@ -442,7 +424,7 @@ const Function = () => {
                   className="card-item"
                   onDragStart={(e) => handleDragStart(e, card)}
                   draggable
-                  onClick={() => setSelectedCard(card)}
+                  onClick={() => handleCardSelection(card)}
                 >
                   <div className="card-content">
                     <img
@@ -471,40 +453,37 @@ const Function = () => {
             </div>
           </div>
           <div className="deck-container" onDrop={handleDrop} onDragOver={handleDragOver} style={{ color: "white" }}>
-
-            <div className="deck-info" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 style={{ marginRight: "24px" }}>My Deck</h2>
-              <div className="deck-count">
-                Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60
-              </div>
-            </div>
-
-            <div className="deck-box">
+        <div className="deck-info" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <h2 style={{ marginRight: "24px" }}>My Deck</h2>
+          <div className="deck-count">
+            Total Cards: {deck.reduce((acc, cur) => acc + cur.quantity, 0)}/60
+          </div>
+        </div>
+        <div className="deck-box">
               <div className="deck-cards">
                 {deck.map((card, index) => (
-                  <div
-                    key={index}
-                    className="deck-card"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, card)}
-                    onDragEnd={() => handleRemoveCardFromDeck(card.id)}
-                    onClick={() => handleSelectCardInDeck(card)} // Hier wird der onClick-Handler hinzugefügt
-                  >
-                    {[...Array(card.quantity)].map((_, i) => (
-                      <img
-                        key={i}
-                        src={card.card_images[0].image_url_small}
-                        alt={card.name}
-                        style={{ width: "55px", height: "auto", margin: "0px" }}
-                      />
-                    ))}
-                  </div>
+                  Array.from({ length: card.quantity }, (_, i) => (
+                    <div
+                      key={`${card.id}-${i}`}
+                      className="deck-card"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, card)}
+                      onDragEnd={() => handleRemoveCardFromDeck(card.id)}
+                      onClick={() => handleSelectCardInDeck(card)} // Hier wird der onClick-Handler hinzugefügt
+                    >
+                      {card.card_images && card.card_images.length > 0 && (
+                        <img
+                          src={card.card_images[0].image_url_small}
+                          alt={card.name}
+                          style={{ width: "85px", height: "auto", margin: "0px"  }}
+                        />
+                      )}
+                    </div>
+                  ))
                 ))}
-              </div>
-            </div>
-
-
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

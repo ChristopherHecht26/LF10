@@ -12,7 +12,7 @@ test('Überprüfung der Anzahl der Karten im Deck', async () => {
 
   // Wähle eine Karte aus den Suchergebnissen aus
   const searchResults = screen.getByText('Search Results');
-  const selectedCard = searchResults.firstChild.firstChild;
+  const selectedCard = screen.getByRole('listitem', { container: searchResults });
 
   // Füge die ausgewählte Karte mehrmals zum Deck hinzu
   userEvent.drag(selectedCard);

@@ -90,8 +90,9 @@ body {
 /* Zusätzliche spezifische Stile für .deck */
 .deck {
   border: 4px solid #fff;
-  padding: 20px; /* Vergrößern des Abstands */
-  width: 0%; /* Festlegen der Breite auf 30% des Elternelements */
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%; /* Breite auf 100% für mobile Geräte */
 }
 
 .deck-cards {
@@ -121,7 +122,7 @@ body {
 }
 
 .deck-card img {
-  width: 150px;
+  width: 100px;
   height: auto;
 }
 
@@ -137,6 +138,7 @@ body {
 /* Stile für die Filter-Container */
 .filters-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 20px;
 }
@@ -177,6 +179,15 @@ body {
   margin: 10px;
   width: 30%; /* Festlegen der Breite auf 30% des Elternelements */
   font-size: 16px;
+  transition: width 0.3s ease; /* Füge eine Übergangseigenschaft für die Breite hinzu */
+}
+
+/* Stile für die Kartenbeschreibung im ausgewählten Kartencontainer */
+.selected-card-container .main-card p {
+  margin-top: 20px; /* Verringere den oberen Abstand der Beschreibung */
+  width: 100%; /* Setze die Breite der Beschreibung auf 100% */
+  max-height: 300px; /* Setze die maximale Höhe der Beschreibung */
+  overflow-y: auto; /* Füge eine Scrollleiste hinzu, wenn die Beschreibung zu lang ist */
 }
 
 /* Stile für die umgebende Container */
@@ -219,10 +230,10 @@ body {
   align-items: center;
 }
 
+/* Stile für das Kartenbild im ausgewählten Kartencontainer */
 .selected-card-container .main-card img {
-  width: 75px;
+  max-width: 100%; /* Setze die maximale Breite des Kartenbildes auf 100% */
   height: auto;
-  margin: 0 auto; /* Zentriert das Bild horizontal */
 }
 
 .deck-container .deck-box {
@@ -278,13 +289,19 @@ body {
   font-size: 16px;
   overflow-y: auto;
   max-height: 750px;
+  transition: width 0.3s ease; /* Füge eine Übergangseigenschaft für die Breite hinzu */
+}
+
+/* Zusätzliche spezifische Stile für .deck-container */
+.deck-container.smaller {
+  width: 20%; /* Verringere die Breite des Deck-Containers auf 20% */
 }
 
 /* Stile für die Karten im Deck-Container */
 .deck-card {
   display: flex;
   align-items: center;
-  margin: 10px;
+  margin: -8px;
   cursor: pointer; /* Zeige die Hand, um anzuzeigen, dass es anklickbar ist */
   border-radius: 10px;
   overflow: hidden;
@@ -304,11 +321,15 @@ body {
 .deck-info {
   font-size: 16px;
   font-weight: bold;
-  top: 10px;
-  left: 10px;
   color: white;
 }
 
+/* Stile für den Decknamen */
+.deck-name {
+  margin-top: 10px;
+  font-size: 20px;
+  color: white;
+}
 
 @media only screen and (max-width: 768px) {
   .search-bar,
@@ -322,4 +343,21 @@ body {
     margin-bottom: 10px;
   }
 
+  .deck-info,
+  .deck-card img {
+    width: 100px; /* Kleinere Größe für Deck-Informationen und Kartenbilder */
+    height: auto;
+  }
+
+  .search-bar button {
+    width: 100%; /* Volle Breite für Such-Button */
+  }
+
+  .deck-container,
+  .selected-card-container,
+  .search-results-container {
+    width: 100%; /* Ändern Sie die Breite auf 100% für alle Container auf kleinen Bildschirmen */
+  }
 }
+
+

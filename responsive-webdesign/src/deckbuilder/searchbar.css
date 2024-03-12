@@ -1,9 +1,0 @@
-.search-bar,
-.filter {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  color: black;
-}
-
-/* Add other search bar styles here */
