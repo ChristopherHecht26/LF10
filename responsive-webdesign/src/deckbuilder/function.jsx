@@ -315,7 +315,7 @@ const Function = () => {
             placeholder="Enter card name..."
             style={{ color: "black" }}
           />
-          <button onClick={fetchCards} style={{ color: "white", backgroundColor: "#007bff", border: "2px solid #007bff" }}>Search</button>
+          
         </div>
 
         <div className="filters-container" style={{ color: "white" }}>
