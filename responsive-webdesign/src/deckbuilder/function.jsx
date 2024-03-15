@@ -37,7 +37,8 @@ const Function = () => {
   const handleCardSelection = (card) => {
     setSelectedCard(card);
     setSelectedCardName(card.name); // Aktualisiere den ausgewählten Kartenname
-    fetchCardDescription(card.id);
+    fetchCardDescription(card.id)
+   
   };
 
   useEffect(() => {
@@ -46,24 +47,35 @@ const Function = () => {
     }
   }, [selectedCard]);
 
+  
+
   const fetchCardDescription = async (cardId) => {
-  try {
-    const response = await fetch(
-      `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`
-    );
-    const data = await response.json();
-    const description = data.data[0].desc || "No description available.";
-    setSelectedCardDescription(description);
-    setSelectedCard({ ...selectedCard, name: data.data[0].name, image_url: null }); // Update selectedCard with new data
-    // Überprüfen, ob die Karte Bilder hat
-    if (data.data[0].card_images.length > 0) {
-      const imageUrl = data.data[0].card_images[0].image_url;
-      setSelectedCard((prevSelectedCard) => ({ ...prevSelectedCard, image_url: imageUrl }));
+    try {
+        const response = await fetch(
+          `https://db.ygoprodeck.com/api/v7/cardinfo.php?id=${cardId}&language=de`
+        );
+        const data = await response.json();
+        console.log(data);
+        if (data.data.length > 0) {
+          const cardData = data.data[0];
+          const description = cardData.desc || "No description available.";
+          const cardImages = cardData.card_images || [];
+          const imageUrl = cardImages.length > 0 ? cardImages[0].image_url : null;
+          setSelectedCardDescription(description);
+          setSelectedCard({
+            name: cardData.name,
+            image_url: imageUrl
+          });
+        } else {
+          console.error("Error fetching card description: No data available");
+        }
+    } catch (error) {
+        console.error("Error fetching card description:", error);
     }
-  } catch (error) {
-    console.error("Error fetching card description:", error);
-  }
 };
+
+
+  
 
   const fetchRacesAndAttributes = async () => {
     try {
@@ -116,15 +128,28 @@ const Function = () => {
     const existingCard = deck.find((c) => c.id === card.id);
     if (existingCard) {
       if (existingCard.quantity < 3) {
-        setDeck([
-          ...deck.filter((c) => c.id !== card.id),
-          { ...card, quantity: existingCard.quantity + 1 },
-        ]);
+        if (getTotalDeckCount() < 60) { // Überprüfen, ob die Gesamtanzahl der Karten im Deck kleiner als 60 ist
+          setDeck([
+            ...deck.filter((c) => c.id !== card.id),
+            { ...card, quantity: existingCard.quantity + 1 },
+          ]);
+        } else {
+          console.warn("Max deck size reached!"); // Warnung ausgeben, wenn die maximale Deckgröße erreicht ist
+        }
       }
     } else {
-      setDeck([...deck, { ...card, quantity: 1 }]);
+      if (getTotalDeckCount() < 60) { // Überprüfen, ob die Gesamtanzahl der Karten im Deck kleiner als 60 ist
+        setDeck([...deck, { ...card, quantity: 1 }]);
+      } else {
+        console.warn("Max deck size reached!"); // Warnung ausgeben, wenn die maximale Deckgröße erreicht ist
+      }
     }
   };
+  
+  const getTotalDeckCount = () => {
+    return deck.reduce((acc, cur) => acc + cur.quantity, 0);
+  };
+  
 
   const handleOpenDeck = () => {
     const fileInput = document.createElement("input");
@@ -209,7 +234,9 @@ const Function = () => {
 
   const handleSelectCardInDeck = (card) => {
     setSelectedCard(card);
-    setSelectedCardName(card.name); // Aktualisiere den ausgewählten Kartenname
+    setSelectedCardName(card.name);
+    fetchCardDescription(card.id);
+
   };
 
   const handleClearDeck = () => {
@@ -217,16 +244,27 @@ const Function = () => {
   };
 
   const handleSaveDeck = () => {
-    if (!promptOpen) {
-      const deckName = prompt("Bitte geben Sie einen Namen für das Deck ein:");
-      setDeckName(deckName);
-      if (!deckName) {
-        return;
+
+      const totalCards = deck.reduce((acc, cur) => acc + cur.quantity, 0);
+      if (totalCards < 40) {
+        const confirmSave = window.confirm("Das Deck enthält weniger als 40 Karten. Trotzdem speichern?");
+        if (!confirmSave) {
+          return;
+        }
       }
+
+      if (!promptOpen) {
+        const deckName = prompt("Bitte geben Sie einen Namen für das Deck ein:");
+        setDeckName(deckName);
+        if (!deckName) {
+          return;
+        }
+        
+
       setPromptOpen(true);
       saveDeck(deckName);
     }
-  };
+};
   
   const saveDeck = (deckName) => {
     const deckData = deck.map((card) => {

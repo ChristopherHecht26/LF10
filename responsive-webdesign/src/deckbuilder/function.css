@@ -360,4 +360,48 @@ body {
   }
 }
 
+@media only screen and (max-width: 414px) {
+  .search-bar,
+  .filter {
+    flex-direction: column;
+    align-items: center;
+  }
 
+  .search-bar input[type="text"] {
+    width: 100%; /* Make the search input full width */
+    margin-bottom: 10px;
+  }
+
+  .main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .deck-info,
+  .deck-card img {
+    width: 100px; /* Kleinere Größe für Deck-Informationen und Kartenbilder */
+    height: auto;
+  }
+
+  .selected-card-container img {
+    width: 70%; /* Breite der Bilder auf 70% im selected-card-container festlegen */
+    height: auto;
+    max-width: 100%; /* Sicherstellen, dass die Bilder nicht breiter als ihr Container werden */
+  }
+
+  .search-bar button {
+    width: 100%; /* Volle Breite für Such-Button */
+  }
+
+  .deck-container,
+  .selected-card-container,
+  .search-results-container {
+    width: 100%; /* Ändern Sie die Breite auf 100% für alle Container auf kleinen Bildschirmen */
+  }
+  .selected-card-container,
+  .deck-container {
+    order: 2; /* Ändern Sie die Reihenfolge von selected-card-container und deck-container auf kleinere Bildschirme */
+  }
+}
