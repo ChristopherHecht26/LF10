@@ -321,7 +321,7 @@ const Function = () => {
             setDeck(cardsInDeck);
             setDeckName(deckName);
           } else {
-            console.error("Invalid deck format.");
+            alert("Invalid deck format.");
           }
         } catch (error) {
           console.error("Error reading file:", error);
